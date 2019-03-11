@@ -6,9 +6,8 @@ import click
 from os_aio_pod.initializers import (InitBeans, InitDebug, InitLog, InitLoop,
                                      InitSignal)
 from os_aio_pod.pod import create
-from os_aio_pod.prototype import PodConfig, LogLevel, LoopType
+from os_aio_pod.prototype import LogLevel, LoopType, PodConfig
 from os_aio_pod.utils import load_module_from_pyfile
-
 
 DEFAULT_CONFIG = PodConfig()
 
@@ -45,8 +44,8 @@ def cli(ctx, **kwargs):
     config = PodConfig(
         **config.copy(update=dict([(i.upper(), kwargs[i]) for i in kwargs])).dict())
 
-    InitLoop().init(config, None)
     pod = create(config, *[c() for c in [
+        InitLoop,
         InitLog,
         InitBeans,
         InitDebug,

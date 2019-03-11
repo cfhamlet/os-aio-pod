@@ -12,9 +12,10 @@ from os_aio_pod.bean import Bean, BeanContext
 
 
 def create(config, *initializers):
-    pod = Pod()
+    pod = None
     for i in initializers:
-        i.init(config, pod)
+        p = i.init(config, pod)
+        pod = p if p else pod
     return pod
 
 

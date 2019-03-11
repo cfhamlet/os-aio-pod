@@ -3,19 +3,21 @@ import asyncio
 import logging
 import sys
 
+from os_aio_pod.pod import Pod
 from os_aio_pod.prototype import LoopType
 
 
 class Initializer(abc.ABC):
 
     @abc.abstractmethod
-    def init(self, pod, config):
+    def init(self, config, pod):
         pass
 
 
 class InitLoop(Initializer):
 
     def init(self, config, pod):
+        assert pod is None
 
         def setup_uvloop():
             import uvloop
@@ -29,6 +31,8 @@ class InitLoop(Initializer):
             'uvloop': setup_uvloop,
             'asyncio': setup_asyncio
         }.get(config.LOOP_TYPE.value)()
+
+        return Pod()
 
 
 class InitLog(Initializer):
