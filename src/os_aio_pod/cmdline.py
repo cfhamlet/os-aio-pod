@@ -1,7 +1,7 @@
 import click
 
 from os_aio_pod.utils import walk_modules
-
+from . import __version__
 
 class CommandFinder(click.MultiCommand):
 
@@ -29,7 +29,7 @@ class CommandFinder(click.MultiCommand):
 def execute(**kwargs):
 
     @click.command(cls=CommandFinder, context_settings=dict(obj=kwargs))
-    @click.version_option(message='%(prog)s %(version)s')
+    @click.version_option(version=__version__)
     @click.pass_context
     def cli(ctx):
         '''Command line tool for os-aio-pot.'''
