@@ -11,6 +11,13 @@ from asyncio_dispatch import Signal
 from os_aio_pod.bean import Bean, BeanContext
 
 
+def create(config, *initializers):
+    pod = Pod()
+    for i in initializers:
+        i.init(config, pod)
+    return pod
+
+
 class Pod(object):
     def __init__(self):
         self._beans = OrderedDict()

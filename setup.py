@@ -29,7 +29,7 @@ setup(
     python_requires='>=3.6',
     zip_safe=False,
     entry_points={
-        'console_scripts': ['aio-pod = os_aio_pod.main:main']
+        'console_scripts': ['os-aio-pod = os_aio_pod.main:main']
     },
     extras_require={
         'uvloop': ['uvloop'],

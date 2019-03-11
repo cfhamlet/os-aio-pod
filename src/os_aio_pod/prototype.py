@@ -14,7 +14,7 @@ class BeanConfig(BaseModel):
 
 class PotConfig(BaseModel):
 
-    PEAS: List[dict] = []
+    BEANS: List[dict] = []
     LOG_LEVEL: str = 'INFO'
     LOOP_TYPE: str = 'AUTO'
     DEBUG: bool = False
