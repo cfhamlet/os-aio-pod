@@ -12,7 +12,7 @@ class BeanConfig(BaseModel):
         allow_extra = True
 
 
-class PotConfig(BaseModel):
+class PodConfig(BaseModel):
 
     BEANS: List[dict] = []
     LOG_LEVEL: str = 'INFO'
