@@ -1,8 +1,10 @@
 import asyncio
+import logging
+import sys
 import time
 from collections import OrderedDict
 from functools import partial
-from inspect import isawaitable, iscoroutine, iscoroutinefunction, isclass
+from inspect import isawaitable, isclass, iscoroutine, iscoroutinefunction
 
 from asyncio_dispatch import Signal
 
@@ -18,7 +20,8 @@ class Pod(object):
         self._signal_dispatcher = Signal()
         self._stopped = self._started = False
         self._finished_event = asyncio.Event()
-        self._stopping_event = None
+        self._stopping_event = asyncio.Event()
+        self._logger = logging.getLogger(self.__class__.__name__)
 
     def __ensure_status(self, status, true_or_false=True):
         s = '_' + status
@@ -43,6 +46,7 @@ class Pod(object):
             loop.set_task_factory(None)
 
     def _on_bean_done(self, bid, future):
+        self._logger.debug(f'bean finished {self._beans[bid]}')
         if bid in self._pending:
             self._pending.remove(bid)
         self._finished.add(bid)
@@ -52,7 +56,7 @@ class Pod(object):
         instance = None
         coro = obj
         idx = 1 if not self._beans else list(self._beans.keys())[-1] + 1
-        context = BeanContext(self, idx, label, **kwargs)
+        context = BeanContext(self, idx, label)
 
         if iscoroutine(obj):
             pass
@@ -60,7 +64,7 @@ class Pod(object):
             coro = obj(**kwargs)
         elif isclass(obj) and hasattr(obj, '__call__') and iscoroutinefunction(obj.__call__):
             instance = obj(context)
-            coro = instance()
+            coro = instance(**kwargs)
         else:
             raise TypeError(f'Invalid type {type(obj)}')
 
@@ -80,23 +84,28 @@ class Pod(object):
     async def send_signal(self, sig, callers=None, **kwargs):
         return await self.__signal('send', sig, callers=callers, **kwargs)
 
-    async def stop(self, timeout=None):
+    def stop(self, timeout=None):
         self.__ensure_status('stopped', False)
         self.__ensure_status('started')
-        if self._stopping_event:
+        if self._stopping_event.is_set():
             return
-        self._stopping_event = asyncio.Event()
-        await self._stop(time.time(), timeout)
+        loop = asyncio.get_event_loop()
+        asyncio.run_coroutine_threadsafe(
+            self._stop(time.time(), timeout), loop)
 
     async def _stop(self, event_time, timeout=None):
+        self._logger.debug(f'stopping timeout: {timeout}')
         force_time = event_time + (timeout if timeout else -1)
-        wait_time = time.time() - force_time
+        wait_time = force_time - time.time()
         try:
-            await asyncio.wait_for(self._finished_event.wait(), timeout=wait_time)
+            if wait_time > 0:
+                await asyncio.wait_for(self._finished_event.wait(), timeout=wait_time)
         except:
             pass
+        self._logger.debug(f'stopping pending beans')
         for bid in self._pending:
             self._beans[bid].cancel()
+            self._logger.debug(f'cancel bean {self._beans[bid]}')
         self._stopping_event.set()
 
     async def run(self):
@@ -104,15 +113,19 @@ class Pod(object):
         self.__ensure_status('started', False)
         self._started = True
 
+        self._logger.debug(f'pod start')
+        for bean in self._beans.values():
+            self._logger.debug(f'panding bean: {bean}')
+
         for next_complete in asyncio.as_completed(self._beans.values()):
             try:
                 await next_complete
             except:
-                # TODO
                 pass
 
         self._finished_event.set()
-        await self.stop()
+        self.stop()
         await self._stopping_event.wait()
         self._started = False
         self._stopped = True
+        self._logger.debug(f'pod finished')
