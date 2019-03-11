@@ -110,3 +110,6 @@ venv.bak/
 
 # xprocess
 .xprocess/
+
+# pycharm
+.idea/
