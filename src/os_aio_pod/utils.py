@@ -5,16 +5,6 @@ import types
 from importlib import import_module
 from logging import _nameToLevel
 from pkgutil import iter_modules
-from logging import _nameToLevel
-
-
-def valid_log_level(value):
-    v = value.upper()
-    if v not in _nameToLevel:
-        choices = ' '.join(_nameToLevel.keys())
-        raise ValueError(
-            f'Invalid choice: {value}. (choose from {choices})')
-    return v
 
 
 def walk_modules(module_path, skip_fail=True):

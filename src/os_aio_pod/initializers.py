@@ -1,6 +1,9 @@
 import abc
-import sys
+import asyncio
 import logging
+import sys
+
+from os_aio_pod.prototype import LoopType
 
 
 class Initializer(abc.ABC):
@@ -13,14 +16,26 @@ class Initializer(abc.ABC):
 class InitLoop(Initializer):
 
     def init(self, config, pod):
-        pass
+
+        def setup_uvloop():
+            import uvloop
+            asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
+
+        def setup_asyncio():
+            pass
+
+        {
+            'auto': setup_uvloop,
+            'uvloop': setup_uvloop,
+            'asyncio': setup_asyncio
+        }.get(config.LOOP_TYPE.value)()
 
 
 class InitLog(Initializer):
 
     def init(self, config, pod):
         logging.basicConfig(
-            level=config.LOG_LEVEL,
+            level=config.LOG_LEVEL.value.upper(),
             format='[%(asctime)s] [%(name)s] [%(levelname)s] %(message)s',
             datefmt='%Y-%m-%d %H:%M:%S',
         )
