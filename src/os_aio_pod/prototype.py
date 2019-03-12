@@ -46,8 +46,10 @@ class PodConfig(BaseModel):
 
     BEANS: List[dict] = []
     LOG_LEVEL: LogLevel = LogLevel.info
-    LOOP_TYPE: LoopType = list(LoopType)[0] if len(LoopType) == 1 else LoopType.auto
+    LOOP_TYPE: LoopType = list(LoopType)[0] if len(
+        LoopType) == 1 else LoopType.auto
     DEBUG: bool = False
+    STOP_WAIT_TIME: int = None
 
     class Config:
         allow_extra = True

@@ -2,6 +2,7 @@ import abc
 import asyncio
 import logging
 import sys
+from signal import Signals
 
 from os_aio_pod.pod import Pod
 from os_aio_pod.prototype import LoopType
@@ -45,12 +46,6 @@ class InitLog(Initializer):
         )
 
 
-class InitBeans(Initializer):
-
-    def init(self, config, pod):
-        pass
-
-
 class InitDebug(Initializer):
 
     def init(self, config, pod):
@@ -62,6 +57,15 @@ class InitDebug(Initializer):
 
 
 class InitSignal(Initializer):
+
+    def init(self, config, pod):
+        loop = asyncio.get_event_loop()
+        for sig in (Signals.SIGINT, Signals.SIGTERM):
+            loop.add_signal_handler(
+                sig.value, pod.stop, config.STOP_WAIT_TIME, sig.name)
+
+
+class InitBeans(Initializer):
 
     def init(self, config, pod):
         pass

@@ -109,14 +109,13 @@ class Pod(object):
 
     async def _stop(self, event_time, timeout=None, sig=None):
         self._logger.debug(f'stopping timeout: {timeout}')
-        force_time = event_time + (timeout if timeout else -1)
-        wait_time = force_time - time.time()
         if sig:
+            self._logger.debug(f'recv signal {sig}')
             r = await self.send_signal(sig)
-            self._logger.debug(f'send signal {sig} {r}')
+            self._logger.debug(f'dispatch signal {sig} {r}')
+        wait_time = timeout if timeout is None else event_time + timeout - time.time()
         try:
-            if wait_time > 0:
-                await asyncio.wait_for(self._finished_event.wait(), timeout=wait_time)
+            await asyncio.wait_for(self._finished_event.wait(), timeout=wait_time)
         except:
             pass
         self._logger.debug(f'stopping pending beans')
