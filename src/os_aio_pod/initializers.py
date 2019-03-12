@@ -1,0 +1,84 @@
+import abc
+import asyncio
+import logging
+import sys
+from signal import Signals
+
+from os_aio_pod.pod import Pod
+from os_aio_pod.prototype import BeanConfig, LoopType
+from os_aio_pod.utils import load_obj
+
+
+class Initializer(abc.ABC):
+
+    @abc.abstractmethod
+    def init(self, config, pod):
+        pass
+
+
+class InitLoop(Initializer):
+
+    def init(self, config, pod):
+        assert pod is None
+
+        def setup_uvloop():
+            import uvloop
+            asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
+
+        def setup_asyncio():
+            pass
+
+        {
+            'auto': setup_uvloop,
+            'uvloop': setup_uvloop,
+            'asyncio': setup_asyncio
+        }.get(config.LOOP_TYPE.value)()
+
+        return Pod()
+
+
+class InitLog(Initializer):
+
+    def init(self, config, pod):
+        logging.basicConfig(
+            level=config.LOG_LEVEL.value.upper(),
+            format='[%(asctime)s] [%(name)s] [%(levelname)s] %(message)s',
+            datefmt='%Y-%m-%d %H:%M:%S',
+        )
+
+
+class InitDebug(Initializer):
+
+    def init(self, config, pod):
+        if config.DEBUG:
+            import asyncio
+            loop = asyncio.get_event_loop()
+            loop.set_debug(True)
+            logging.getLogger().setLevel(logging.DEBUG)
+
+
+class InitSignal(Initializer):
+
+    def init(self, config, pod):
+        loop = asyncio.get_event_loop()
+        for sig in (Signals.SIGINT, Signals.SIGTERM):
+            loop.add_signal_handler(
+                sig.value, pod.stop, config.STOP_WAIT_TIME, sig.name)
+
+
+class InitBeans(Initializer):
+
+    def _load_bean(self, c, pod):
+        bean_config = BeanConfig(**c)
+        obj = load_obj(bean_config.core)
+        kwargs = bean_config.dict(exclude={'core'})
+        pod.add_bean(obj, **kwargs)
+
+    def init(self, config, pod):
+        sys.path.insert(0, '.')
+        logger = logging.getLogger(self.__class__.__name__)
+        for c in config.BEANS:
+            try:
+                self._load_bean(c, pod)
+            except Exception as e:
+                logger.error(f'Init bean error {e}')

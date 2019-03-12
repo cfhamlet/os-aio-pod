@@ -1,0 +1,10 @@
+[run]
+parallel = true
+branch = true
+source = os_aio_pod
+
+[paths]
+source =
+    src/os_aio_pod
+    .tox/*/lib/python*/site-packages/os_aio_pod
+    .tox/*/site-packages/os_aio_pod
