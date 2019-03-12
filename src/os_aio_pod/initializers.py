@@ -5,7 +5,8 @@ import sys
 from signal import Signals
 
 from os_aio_pod.pod import Pod
-from os_aio_pod.prototype import LoopType
+from os_aio_pod.prototype import BeanConfig, LoopType
+from os_aio_pod.utils import load_obj
 
 
 class Initializer(abc.ABC):
@@ -67,5 +68,17 @@ class InitSignal(Initializer):
 
 class InitBeans(Initializer):
 
+    def _load_bean(self, c, pod):
+        bean_config = BeanConfig(**c)
+        obj = load_obj(bean_config.core)
+        kwargs = bean_config.dict(exclude={'core'})
+        pod.add_bean(obj, **kwargs)
+
     def init(self, config, pod):
-        pass
+        sys.path.insert(0, '.')
+        logger = logging.getLogger(self.__class__.__name__)
+        for c in config.BEANS:
+            try:
+                self._load_bean(c, pod)
+            except Exception as e:
+                logger.error(f'Init bean error {e}')

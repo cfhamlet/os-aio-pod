@@ -48,8 +48,8 @@ class Pod(object):
             bean.add_done_callback(partial(self._on_bean_done, bean.id))
             if bean.label:
                 if bean.label not in self._label_index:
-                    self._label_index = []
-                self._label_index[bean.label].appned(bean.id)
+                    self._label_index[bean.label] = []
+                self._label_index[bean.label].append(bean.id)
         finally:
             loop.set_task_factory(None)
 
