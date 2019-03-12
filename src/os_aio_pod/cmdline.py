@@ -32,7 +32,7 @@ def execute(**kwargs):
     @click.version_option(version=__version__)
     @click.pass_context
     def cli(ctx):
-        '''Command line tool for os-aio-pot.'''
+        '''Command line tool for os-aio-pod.'''
         pass
 
     cli()

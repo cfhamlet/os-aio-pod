@@ -63,7 +63,13 @@ def cli(ctx, **kwargs):
         InitLog,
         InitBeans,
         InitDebug,
-        InitSignal]])
+        InitSignal,
+    ]]
+    )
 
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(pod.run())
+    loop = pod.loop
+    try:
+        loop.run_until_complete(pod.run())
+    finally:
+        loop.stop()
+        loop.close()

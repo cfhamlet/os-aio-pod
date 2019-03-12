@@ -20,16 +20,21 @@ def create(config, *initializers):
 
 
 class Pod(object):
-    def __init__(self):
+    def __init__(self, loop=None):
+        self._loop = loop if loop else asyncio.get_event_loop()
         self._beans = OrderedDict()
         self._label_index = {}
         self._finished = set()
         self._pending = set()
-        self._signal_dispatcher = Signal()
+        self._signal_dispatcher = Signal(loop=self._loop)
         self._stopped = self._started = False
-        self._finished_event = asyncio.Event()
-        self._stopping_event = asyncio.Event()
+        self._finished_event = asyncio.Event(loop=self._loop)
+        self._stopping_event = asyncio.Event(loop=self._loop)
         self._logger = logging.getLogger(self.__class__.__name__)
+
+    @property
+    def loop(self):
+        return self._loop
 
     def __ensure_status(self, status, true_or_false=True):
         s = '_' + status
@@ -39,10 +44,9 @@ class Pod(object):
     def add_bean(self, obj, label=None, **kwargs):
         self.__ensure_status('stopped', False)
         self.__ensure_status('started', False)
-        loop = asyncio.get_event_loop()
-        loop.set_task_factory(self._create_bean)
+        self._loop.set_task_factory(self._create_bean)
         try:
-            bean = loop.create_task((obj, label, kwargs))
+            bean = self._loop.create_task((obj, label, kwargs))
             self._beans[bean.id] = bean
             self._pending.add(bean.id)
             bean.add_done_callback(partial(self._on_bean_done, bean.id))
@@ -51,7 +55,7 @@ class Pod(object):
                     self._label_index[bean.label] = []
                 self._label_index[bean.label].append(bean.id)
         finally:
-            loop.set_task_factory(None)
+            self._loop.set_task_factory(None)
 
     def get_bean(self, bid):
         return self._beans.get(bid, None)
@@ -83,7 +87,7 @@ class Pod(object):
             raise TypeError(f'Invalid type {type(obj)}')
 
         context.instance = instance
-        return Bean(context, coro)
+        return Bean(context, coro, loop=self._loop)
 
     async def __signal(self, method, sig, callers=None, **kwargs):
         call = getattr(self._signal_dispatcher, method)
@@ -103,9 +107,8 @@ class Pod(object):
         self.__ensure_status('started')
         if self._stopping_event.is_set():
             return
-        loop = asyncio.get_event_loop()
         asyncio.run_coroutine_threadsafe(
-            self._stop(time.time(), timeout, sig), loop)
+            self._stop(time.time(), timeout, sig), self._loop)
 
     async def _stop(self, event_time, timeout=None, sig=None):
         self._logger.debug(f'stopping timeout: {timeout}')

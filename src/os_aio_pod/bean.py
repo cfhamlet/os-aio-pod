@@ -1,3 +1,4 @@
+import asyncio
 from itertools import chain
 from asyncio import Task
 
@@ -8,6 +9,10 @@ class BeanContext(object):
         self.label = label
         self.pod = pod
         self.instance = None
+
+    @property
+    def loop(self):
+        return self.pod.loop
 
     @property
     def bean(self):

@@ -34,6 +34,7 @@ setup(
     extras_require={
         'uvloop': ['uvloop'],
         'uvicorn': ['uvicorn'],
+        'aiomonitor': ['aiomonitor'],
     },
     classifiers=[
         'Development Status :: 2 - Pre-Alpha',
