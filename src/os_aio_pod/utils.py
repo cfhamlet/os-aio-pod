@@ -28,10 +28,9 @@ def expected_cls(module, cls, base_class, include_base_class=False):
     if inspect.isclass(cls) and \
             issubclass(cls, base_class) and \
             cls.__module__ == module.__name__ and \
-            (include_base_class or
-             all([cls != base for base in base_class])
-             if isinstance(base_class, tuple)
-             else cls != base_class):
+            (include_base_class or (all([cls != base for base in base_class])
+                                    if isinstance(base_class, tuple)
+                                    else cls != base_class)):
         return True
     return False
 
