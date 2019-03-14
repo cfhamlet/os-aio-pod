@@ -26,6 +26,7 @@ class Pod(object):
         self._label_index = {}
         self._finished = set()
         self._pending = set()
+        self._bean_done_events = {}
         self._signal_dispatcher = Signal(loop=self._loop)
         self._stopped = self._started = False
         self._finished_event = asyncio.Event(loop=self._loop)
@@ -35,6 +36,10 @@ class Pod(object):
     @property
     def loop(self):
         return self._loop
+
+    async def wait_beans_done(self, bid_or_label):
+        beans = self.get_beans(bid_or_label)
+        await asyncio.wait(beans, loop=self._loop)
 
     def __ensure_status(self, status, true_or_false=True):
         s = '_' + status
@@ -49,6 +54,7 @@ class Pod(object):
             bean = self._loop.create_task((obj, label, kwargs))
             self._beans[bean.id] = bean
             self._pending.add(bean.id)
+            self._bean_done_events[bean.id] = asyncio.Event(loop=self._loop)
             bean.add_done_callback(partial(self._on_bean_done, bean.id))
             if bean.label:
                 if bean.label not in self._label_index:
@@ -57,17 +63,18 @@ class Pod(object):
         finally:
             self._loop.set_task_factory(None)
 
-    def get_bean(self, bid):
-        return self._beans.get(bid, None)
-
-    def get_beans_by_label(self, label):
-        return [self._beans[bid] for bid in self._label_index.get(label, [])]
+    def get_beans(self, bid_or_label):
+        bids = [bid_or_label]
+        if isinstance(bid_or_label, str):
+            bids = self._label_index[bid_or_label]
+        return [self._beans[bid] for bid in bids]
 
     def _on_bean_done(self, bid, future):
         self._logger.debug(f'Bean finished {self._beans[bid]}')
         if bid in self._pending:
             self._pending.remove(bid)
         self._finished.add(bid)
+        self._bean_done_events[bid].set()
 
     def _create_bean(self, loop, kw):
         obj, label, kwargs = kw

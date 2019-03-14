@@ -33,11 +33,11 @@ class Server(BaseServer):
 
         await self.install_signal_handlers()
 
-        self.logger.info("Started server process [{}]".format(process_id))
+        self.logger.info(f"Started server process [{process_id}]")
         await self.startup()
         await self.main_loop()
         await self.shutdown()
-        self.logger.info("Finished server process [{}]".format(process_id))
+        self.logger.info(f"Finished server process [{process_id}]")
 
     async def install_signal_handlers(self):
         for sig in ('SIGINT', 'SIGTERM'):
