@@ -13,6 +13,9 @@ class BeanContext(object):
     async def wait_beans_done(self, bid_or_label):
         await self.pod.wait_beans_done(bid_or_label)
 
+    def get_beans(self, bid_or_label):
+        return self.pod.get_beans(bid_or_label)
+
     @property
     def loop(self):
         return self.pod.loop
