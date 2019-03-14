@@ -34,7 +34,6 @@ class AioMonitor(object):
         stop_event = asyncio.Event(loop=self.context.loop)
 
         async def stop(**kwargs):
-            print(kwargs)
             if not stop_event.is_set() and not monitor.closed:
                 try:
                     await monitor.close()

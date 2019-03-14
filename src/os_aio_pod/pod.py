@@ -64,7 +64,7 @@ class Pod(object):
         return [self._beans[bid] for bid in self._label_index.get(label, [])]
 
     def _on_bean_done(self, bid, future):
-        self._logger.debug(f'bean finished {self._beans[bid]}')
+        self._logger.debug(f'Bean finished {self._beans[bid]}')
         if bid in self._pending:
             self._pending.remove(bid)
         self._finished.add(bid)
@@ -111,20 +111,20 @@ class Pod(object):
             self._stop(time.time(), timeout, sig), self._loop)
 
     async def _stop(self, event_time, timeout=None, sig=None):
-        self._logger.debug(f'stopping timeout: {timeout}')
+        self._logger.debug(f'Stopping timeout: {timeout}')
         if sig:
-            self._logger.debug(f'recv signal {sig}')
+            self._logger.debug(f'Recv signal {sig}')
             r = await self.send_signal(sig)
-            self._logger.debug(f'dispatch signal {sig} {r}')
+            self._logger.debug(f'Dispatch signal {sig} {r}')
         wait_time = timeout if timeout is None else event_time + timeout - time.time()
         try:
             await asyncio.wait_for(self._finished_event.wait(), timeout=wait_time)
         except:
             pass
-        self._logger.debug(f'stopping pending beans')
+        self._logger.debug(f'Stopping pending beans')
         for bid in self._pending:
             self._beans[bid].cancel()
-            self._logger.debug(f'cancel bean {self._beans[bid]}')
+            self._logger.debug(f'Cancel bean {self._beans[bid]}')
         self._stopping_event.set()
 
     async def run(self):
@@ -132,9 +132,9 @@ class Pod(object):
         self.__ensure_status('started', False)
         self._started = True
 
-        self._logger.debug(f'pod start')
+        self._logger.debug(f'Pod start')
         for bean in self._beans.values():
-            self._logger.debug(f'panding bean: {bean}')
+            self._logger.debug(f'Pending bean: {bean}')
 
         for next_complete in asyncio.as_completed(self._beans.values()):
             try:
@@ -143,8 +143,9 @@ class Pod(object):
                 pass
 
         self._finished_event.set()
-        self.stop()
-        await self._stopping_event.wait()
+        if not self._stopping_event.is_set():
+            self.stop()
+            await self._stopping_event.wait()
         self._started = False
         self._stopped = True
-        self._logger.debug(f'pod finished')
+        self._logger.debug(f'Pod finished')

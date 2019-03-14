@@ -71,5 +71,5 @@ def cli(ctx, **kwargs):
     try:
         loop.run_until_complete(pod.run())
     finally:
-        loop.stop()
+        loop.run_until_complete(loop.shutdown_asyncgens())
         loop.close()
