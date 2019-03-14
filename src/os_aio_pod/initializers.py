@@ -34,7 +34,8 @@ class InitLoop(Initializer):
             'asyncio': setup_asyncio
         }.get(config.LOOP_TYPE.value)()
 
-        return Pod()
+        loop = asyncio.get_event_loop()
+        return Pod(loop=loop)
 
 
 class InitLog(Initializer):
@@ -51,18 +52,15 @@ class InitDebug(Initializer):
 
     def init(self, config, pod):
         if config.DEBUG:
-            import asyncio
-            loop = asyncio.get_event_loop()
-            loop.set_debug(True)
+            pod.loop.set_debug(True)
             logging.getLogger().setLevel(logging.DEBUG)
 
 
 class InitSignal(Initializer):
 
     def init(self, config, pod):
-        loop = asyncio.get_event_loop()
         for sig in (Signals.SIGINT, Signals.SIGTERM):
-            loop.add_signal_handler(
+            pod.loop.add_signal_handler(
                 sig.value, pod.stop, config.STOP_WAIT_TIME, sig.name)
 
 

@@ -1,3 +1,4 @@
+import asyncio
 from itertools import chain
 from asyncio import Task
 
@@ -9,9 +10,19 @@ class BeanContext(object):
         self.pod = pod
         self.instance = None
 
+    async def wait_beans_done(self, bid_or_label):
+        await self.pod.wait_beans_done(bid_or_label)
+
+    def get_beans(self, bid_or_label):
+        return self.pod.get_beans(bid_or_label)
+
+    @property
+    def loop(self):
+        return self.pod.loop
+
     @property
     def bean(self):
-        return self.pod.get_bean(self.id)
+        return self.pod.get_beans(self.id)[0]
 
     async def add_signal_handler(self, sig, callback):
         return await self.pod.add_signal_handler(sig, callback=callback, callers={self.bean})
@@ -23,7 +34,7 @@ class BeanContext(object):
         beans = None
         if labels is not None:
             beans = set(
-                chain(*[self.pod.get_beans_by_label(label) for label in labels]))
+                chain(*[self.pod.get_beans(label) for label in labels]))
         return await self.pod.send_signal(sig, callers=beans, **kwargs)
 
 
