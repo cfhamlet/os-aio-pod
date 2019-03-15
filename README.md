@@ -96,17 +96,18 @@ Other system signals are not supported yet.
 
 ### Configure
 
-Config file is a regular Python file, all upper case variables will pass to the frame work can be accessed later. The reserved key words:
+Config file is a regular Python file, all upper case variables will pass to the frame work which can be accessed later. The reserved key words:
 
-* ``BEANS``, a list of bean config dict, the reserved key words of each bean config are:  ``core``, ``label``, other keyword arguments will pass to your function.
+* ``BEANS``: a list of bean config dict, the reserved key words of each bean config are:  ``core``, ``label``, other keyword arguments will pass to your function
 
-    ``core``,  string path of your coroutine
-    ``label``, optional, can be used to trace your bean.
+    ``core``:  string path of your coroutine
 
-* ``LOG_LEVEL``, logger level, default  ``INFO``
-* ``LOOP_TYPE``, default is ``asyncio``, can be ``uvloop`` when you install uvloop
-* ``DEBUG``, enable debug mode, default ``False``
-* ``STOP_WAIT_TIME``, the wait time when recieve signal(``SIGINT``, ``SIGTERM``). Once timeout, all unfinished bean will be cancelled. Default is ``None``, indicate wait until all beans done.
+    ``label``: optional, can be used to trace your bean
+
+* ``LOG_LEVEL``: logger level, default  ``INFO``
+* ``LOOP_TYPE``: default is ``asyncio``, can be ``uvloop`` when you install uvloop
+* ``DEBUG``: enable debug mode, default ``False``
+* ``STOP_WAIT_TIME``: the wait time when recieve signal(``SIGINT``, ``SIGTERM``). Once timeout, all unfinished bean will be cancelled. Default is ``None``, indicate wait until all beans done
 
 
 
@@ -151,7 +152,7 @@ $ os-aio-pod run --help
 
 ### Built-In Components
 
-There are some built-in adapter can be used for convenient.
+There are some built-in adapters can be used for convenient.
 
 * [uvicorn](https://github.com/encode/uvicorn), a lightning-fast ASGI server
 
@@ -162,7 +163,7 @@ There are some built-in adapter can be used for convenient.
     ```
     BEANS = [
         {
-            'core': 'os_aio_pod.contrib.uvicorn.Uvicorn',
+            'core': 'os_aio_pod.contrib.uvicorn.UvicornAdapter',
             'app' : 'your.app.object.path'
         }
     ]
@@ -178,7 +179,7 @@ There are some built-in adapter can be used for convenient.
     ```
     BEANS = [
         {
-            'core': 'os_aio_pod.contrib.aiomonitor.AioMonitor',
+            'core': 'os_aio_pod.contrib.aiomonitor.AioMonitorAdapter',
         }
     ]
     ```
@@ -188,14 +189,14 @@ There are some built-in adapter can be used for convenient.
     ```
     BEANS = [
         {
-            'core': 'os_aio_pod.contrib.tcp_server.TCPServer',
+            'core': 'os_aio_pod.contrib.tcp_server.TCPServerAdapter',
             'protocal': 'your.asyncio.Protocal.path'
             # 'server': 'your.event.driven.server'
         }
     ]
     ```
 
-    a event driven server can be inherited(from ``os_aio_pod.contrib.tcp_server.Server``) and configured attached to your protocal object for more fuctional purpose
+    a event driven server can be inherited(from ``os_aio_pod.contrib.tcp_server.Server``) and configure attach to your protocal object for more fuctional purpose
 
 
 ## Unit Tests
