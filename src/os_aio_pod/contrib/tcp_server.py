@@ -39,7 +39,7 @@ class ProtocalModel(str):
     @classmethod
     def validate(cls, v):
         if isinstance(v, str):
-            _cls = load_class(v, ProtocalModel)
+            _cls = load_class(v, asyncio.Protocol)
             if _cls is None:
                 raise ValueError(f'Can not load {v}')
             v = _cls
@@ -77,7 +77,7 @@ class Config(BaseModel):
         allow_extra = True
 
 
-class TCPServer(object):
+class TCPServerAdapter(object):
 
     def __init__(self, context):
         self.context = context

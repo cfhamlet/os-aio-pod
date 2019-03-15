@@ -152,7 +152,7 @@ $ os-aio-pod run --help
 
 ### Built-In Components
 
-There are some built-in adapter can be used for convenient.
+There are some built-in adapters can be used for convenient.
 
 * [uvicorn](https://github.com/encode/uvicorn), a lightning-fast ASGI server
 
@@ -163,7 +163,7 @@ There are some built-in adapter can be used for convenient.
     ```
     BEANS = [
         {
-            'core': 'os_aio_pod.contrib.uvicorn.Uvicorn',
+            'core': 'os_aio_pod.contrib.uvicorn.UvicornAdapter',
             'app' : 'your.app.object.path'
         }
     ]
@@ -179,7 +179,7 @@ There are some built-in adapter can be used for convenient.
     ```
     BEANS = [
         {
-            'core': 'os_aio_pod.contrib.aiomonitor.AioMonitor',
+            'core': 'os_aio_pod.contrib.aiomonitor.AioMonitorAdapter',
         }
     ]
     ```
@@ -189,7 +189,7 @@ There are some built-in adapter can be used for convenient.
     ```
     BEANS = [
         {
-            'core': 'os_aio_pod.contrib.tcp_server.TCPServer',
+            'core': 'os_aio_pod.contrib.tcp_server.TCPServerAdapter',
             'protocal': 'your.asyncio.Protocal.path'
             # 'server': 'your.event.driven.server'
         }

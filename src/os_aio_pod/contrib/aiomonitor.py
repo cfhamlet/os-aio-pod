@@ -20,7 +20,7 @@ class Monitor(BaseMonitor):
             self._closed = True
 
 
-class AioMonitor(object):
+class AioMonitorAdapter(object):
 
     def __init__(self, context):
         self.context = context

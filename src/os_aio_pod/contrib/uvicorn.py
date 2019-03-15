@@ -50,7 +50,7 @@ class Server(BaseServer):
             self.should_exit = True
 
 
-class Uvicorn(object):
+class UvicornAdapter(object):
 
     def __init__(self, context):
         self.context = context
