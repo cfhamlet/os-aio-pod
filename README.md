@@ -103,10 +103,10 @@ Config file is a regular Python file, all upper case variables will pass to the 
     ``core``,  string path of your coroutine
     ``label``, optional, can be used to trace your bean.
 
-* ``LOG_LEVEL``, logger level, default  ``INFO``
-* ``LOOP_TYPE``, default is ``asyncio``, can be ``uvloop`` when you install uvloop
-* ``DEBUG``, enable debug mode, default ``False``
-* ``STOP_WAIT_TIME``, the wait time when recieve signal(``SIGINT``, ``SIGTERM``). Once timeout, all unfinished bean will be cancelled. Default is ``None``, indicate wait until all beans done.
+* ``LOG_LEVEL``: logger level, default  ``INFO``
+* ``LOOP_TYPE``: default is ``asyncio``, can be ``uvloop`` when you install uvloop
+* ``DEBUG``: enable debug mode, default ``False``
+* ``STOP_WAIT_TIME``: the wait time when recieve signal(``SIGINT``, ``SIGTERM``). Once timeout, all unfinished bean will be cancelled. Default is ``None``, indicate wait until all beans done.
 
 
 
@@ -195,7 +195,7 @@ There are some built-in adapter can be used for convenient.
     ]
     ```
 
-    a event driven server can be inherited(from ``os_aio_pod.contrib.tcp_server.Server``) and configured attached to your protocal object for more fuctional purpose
+    a event driven server can be inherited(from ``os_aio_pod.contrib.tcp_server.Server``) and configure attach to your protocal object for more fuctional purpose
 
 
 ## Unit Tests
