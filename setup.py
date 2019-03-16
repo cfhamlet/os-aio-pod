@@ -34,6 +34,7 @@ setup(
     extras_require={
         'uvloop': ['uvloop'],
         'uvicorn': ['uvicorn'],
+        'aiohttp': ['aiohttp'],
         'aiomonitor': ['aiomonitor'],
     },
     classifiers=[
