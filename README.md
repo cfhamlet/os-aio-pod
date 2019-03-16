@@ -36,6 +36,7 @@ There are some extra packages can be installed for more  features.
 | ---------- | -------------------------------------- | ------------------------------------------------------------ |
 | uvloop     | ``pip install os-aio-pod[uvloop]``     | enable [uvloop](https://github.com/MagicStack/uvloop)        |
 | uvicorn    | ``pip install os-aio-pod[uvicorn]``    | enable [uvicorn](https://github.com/encode/uvicorn) http server adapter |
+| aiohttp | ``pip install os-aio-pod[aiohttp]`` | enable [aiohttp](https://github.com/aio-libs/aiohttp) http server adapter |
 | aiomonitor | ``pip install os-aio-pod[aiomonitor]`` | enable [aiomonitor](https://github.com/aio-libs/aiomonitor) adapter |
 
 
@@ -171,6 +172,23 @@ There are some built-in adapters can be used for convenient.
 
     a context object named ``aio_pod_context`` will attached to the app object
 
+* [aiohttp](https://github.com/aio-libs/aiohttp), a well known aio http server
+
+    ```
+    pip install aiohttp
+    ```
+
+    ```
+    BEANS = [
+        {
+            'core': 'os_aio_pod.contrib.aiohttp.WebAdapter',
+            'app' : 'your.app.object.path'
+        }
+    ]
+    ```
+
+    a context object named ``aio_pod_context`` will attached to the app object
+
 * [aiomonitor](https://github.com/aio-libs/aiomonitor), adds monitor and python REPL capabilities for asyncio application
     ```
     pip install aiomonitor
@@ -190,13 +208,13 @@ There are some built-in adapters can be used for convenient.
     BEANS = [
         {
             'core': 'os_aio_pod.contrib.tcp_server.TCPServerAdapter',
-            'protocal': 'your.asyncio.Protocal.path'
+            'protocol': 'your.asyncio.Protocol.path'
             # 'server': 'your.event.driven.server'
         }
     ]
     ```
 
-    a event driven server can be inherited(from ``os_aio_pod.contrib.tcp_server.Server``) and configure attach to your protocal object for more fuctional purpose
+    a event driven server can be inherited(from ``os_aio_pod.contrib.tcp_server.Server``) and configure attach to your protocol object for more fuctional purpose
 
 
 ## Unit Tests

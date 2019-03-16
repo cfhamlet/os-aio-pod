@@ -7,6 +7,34 @@ from logging import _nameToLevel
 from pkgutil import iter_modules
 
 
+def model_from_string(base_class, instance=False, package=None):
+    assert inspect.isclass(base_class)
+
+    class Model(str):
+        @classmethod
+        def __get_validators__(cls):
+            yield cls.validate
+
+        @classmethod
+        def validate(cls, v):
+            if isinstance(v, str):
+                obj = load_obj(v, package=package) if instance else load_class(
+                    v, base_class, package=package)
+
+                if obj is None:
+                    raise ValueError(f'Can not load {v}')
+                
+                v = obj
+            if instance:
+                if isinstance(v, base_class):
+                    return v
+            else:
+                if inspect.isclass(v) and issubclass(v, base_class):
+                    return v
+            raise ValueError(f'{repr(base_class)} expected')
+    return Model
+
+
 def walk_modules(module_path, skip_fail=True):
 
     mod = None
