@@ -1,12 +1,12 @@
 import asyncio
+import logging
 from multiprocessing import Process
 from socket import SO_REUSEADDR, SOL_SOCKET, socket
 from typing import Union
-import logging
 
 from pydantic import BaseModel, validator
 
-from os_aio_pod.utils import load_class
+from os_aio_pod.utils import model_from_string
 
 
 class Server(object):
@@ -31,47 +31,13 @@ class Server(object):
         pass
 
 
-class ProtocalModel(str):
-    @classmethod
-    def __get_validators__(cls):
-        yield cls.validate
-
-    @classmethod
-    def validate(cls, v):
-        if isinstance(v, str):
-            _cls = load_class(v, asyncio.Protocol)
-            if _cls is None:
-                raise ValueError(f'Can not load {v}')
-            v = _cls
-        elif not issubclass(v, asyncio.Protocol):
-            raise ValueError(f'asyncio.Protocal expected not {type(v)}')
-        return v
-
-
-class ServerModel(str):
-    @classmethod
-    def __get_validators__(cls):
-        yield cls.validate
-
-    @classmethod
-    def validate(cls, v):
-        if isinstance(v, str):
-            _cls = load_class(v, Server)
-            if _cls is None:
-                raise ValueError(f'Can not load {v}')
-            v = _cls
-        elif not issubclass(v, Server):
-            raise ValueError(f'Server expected not {type(v)}')
-        return v
-
-
 class Config(BaseModel):
 
     host: str = '127.0.0.1'
     port: int = 9399
-    protocal: ProtocalModel
+    protocol: model_from_string(asyncio.Protocol)
     backlog: int = 100
-    server: ServerModel = Server
+    server: model_from_string(Server) = Server
 
     class Config:
         allow_extra = True
@@ -88,10 +54,10 @@ class TCPServerAdapter(object):
         loop = self.context.loop
 
         tcp_server = config.server(self.context, config)
-        config.protocal.server = tcp_server
+        config.protocol.server = tcp_server
 
         factory = loop.create_server(
-            config.protocal,
+            config.protocol,
             config.host,
             config.port,
             backlog=config.backlog,
