@@ -4,7 +4,7 @@ from multiprocessing import Process
 from socket import SO_REUSEADDR, SOL_SOCKET, socket
 from typing import Union
 
-from pydantic import BaseModel, validator
+from pydantic import BaseModel, Schema, validator
 
 from os_aio_pod.utils import model_from_string
 
@@ -37,7 +37,7 @@ class Config(BaseModel):
     port: int = 9399
     protocol: model_from_string(asyncio.Protocol)
     backlog: int = 100
-    server: model_from_string(Server) = Server
+    server: model_from_string(Server) = Schema(Server, validate_always=True)
 
     class Config:
         allow_extra = True
