@@ -52,6 +52,7 @@ class TCPServerAdapter(object):
 
     def __init__(self, context):
         self.context = context
+        self.server = None
 
     async def __call__(self, **kwargs):
         logger = logging.getLogger(self.__class__.__name__)
@@ -79,6 +80,7 @@ class TCPServerAdapter(object):
                 backlog=config.backlog,
             )
 
+        self.server = tcp_server
         logger.debug(f'Starting tcp server on {config.host}:{config.port}')
 
         await tcp_server.on_setup()
