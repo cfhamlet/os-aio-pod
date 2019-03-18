@@ -1,4 +1,5 @@
 import asyncio
+from asyncio.streams import _DEFAULT_LIMIT
 import logging
 from multiprocessing import Process
 from socket import SO_REUSEADDR, SOL_SOCKET, socket
@@ -18,6 +19,9 @@ class Server(object):
     async def on_signal(self, sig):
         pass
 
+    async def on_connect(self, reader, writer):
+        pass
+
     async def on_setup(self):
         pass
 
@@ -35,8 +39,9 @@ class Config(BaseModel):
 
     host: str = '127.0.0.1'
     port: int = 9399
-    protocol: model_from_string(asyncio.Protocol)
+    protocol: model_from_string(asyncio.Protocol) = None
     backlog: int = 100
+    limit: int = _DEFAULT_LIMIT
     server: model_from_string(Server) = Schema(Server, validate_always=True)
 
     class Config:
@@ -54,14 +59,25 @@ class TCPServerAdapter(object):
         loop = self.context.loop
 
         tcp_server = config.server(self.context, config)
-        config.protocol.server = tcp_server
 
-        factory = loop.create_server(
-            config.protocol,
-            config.host,
-            config.port,
-            backlog=config.backlog,
-        )
+        factory = None
+        if config.protocol is None:
+            factory = asyncio.start_server(
+                tcp_server.on_connect,
+                config.host,
+                config.port,
+                backlog=config.backlog,
+                limit=config.limit,
+                loop=loop
+            )
+        else:
+            config.protocol.server = tcp_server
+            factory = loop.create_server(
+                config.protocol,
+                config.host,
+                config.port,
+                backlog=config.backlog,
+            )
 
         logger.debug(f'Starting tcp server on {config.host}:{config.port}')
 
