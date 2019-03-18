@@ -153,7 +153,7 @@ $ os-aio-pod run --help
 
 ### Built-In Components
 
-There are some built-in adapters can be used for convenient.
+There are some built-in adapters can be used for convenient:
 
 * [uvicorn](https://github.com/encode/uvicorn), a lightning-fast ASGI server
 
@@ -204,17 +204,21 @@ There are some built-in adapters can be used for convenient.
 
 * built-in tcp server
 
+    An event driven server can be inherited from ``os_aio_pod.contrib.tcp_server.Server``(default server).
+    
+    If protocol is configured, low-level networking protocol interface will be used instead of the server's on_connect method. The server instance can be accessed with ``your_protocol.server``
+
     ```
     BEANS = [
         {
             'core': 'os_aio_pod.contrib.tcp_server.TCPServerAdapter',
-            'protocol': 'your.asyncio.Protocol.path'
+            # 'protocol': 'your.asyncio.Protocol.path'
             # 'server': 'your.event.driven.server'
         }
     ]
     ```
 
-    a event driven server can be inherited(from ``os_aio_pod.contrib.tcp_server.Server``) and configure attach to your protocol object for more fuctional purpose
+    
 
 
 ## Unit Tests
