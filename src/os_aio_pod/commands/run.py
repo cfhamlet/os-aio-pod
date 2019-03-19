@@ -12,6 +12,25 @@ from os_aio_pod.utils import load_module_from_pyfile
 DEFAULT_CONFIG = PodConfig()
 
 
+def run(config):
+    pod = create(config, *[
+        c() for c in [
+            InitLoop,
+            InitLog,
+            InitBeans,
+            InitDebug,
+            InitSignal,
+        ]]
+    )
+
+    loop = pod.loop
+    try:
+        loop.run_until_complete(pod.run())
+    finally:
+        loop.run_until_complete(loop.shutdown_asyncgens())
+        loop.close()
+
+
 @click.command()
 @click.option(
     '--debug', is_flag=True,
@@ -58,18 +77,4 @@ def cli(ctx, **kwargs):
     config = PodConfig(
         **config.copy(update=dict([(i.upper(), kwargs[i]) for i in kwargs])).dict())
 
-    pod = create(config, *[c() for c in [
-        InitLoop,
-        InitLog,
-        InitBeans,
-        InitDebug,
-        InitSignal,
-    ]]
-    )
-
-    loop = pod.loop
-    try:
-        loop.run_until_complete(pod.run())
-    finally:
-        loop.run_until_complete(loop.shutdown_asyncgens())
-        loop.close()
+    run(config)
