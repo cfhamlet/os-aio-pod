@@ -1,10 +1,33 @@
 import collections
 import inspect
+import os
 import re
 import types
 from importlib import import_module
 from logging import _nameToLevel
 from pkgutil import iter_modules
+
+from os_aio_pod.config import BlankConfig
+
+
+def update_from_bean_config(config):
+    bean_configs = []
+    for old_config in config.BEANS:
+        if old_config.config is None:
+            continue
+        config_file = old_config.config
+        md = load_module_from_pyfile(os.path.abspath(config_file))
+        blank_config = BlankConfig.parse_obj(dict(
+            [(i, getattr(md, i)) for i in dir(md)
+             if not i.startswith('_')]))
+        new_config = old_config.copy(
+            deep=True,
+            update=blank_config.dict(exclude={'core', 'config'})
+        )
+        bean_configs.append(new_config)
+    if bean_configs:
+        config = config.copy(deep=True, update={'BEANS': bean_configs})
+    return config
 
 
 def model_from_string(base_class, instance=False, package=None):
@@ -23,7 +46,7 @@ def model_from_string(base_class, instance=False, package=None):
 
                 if obj is None:
                     raise ValueError(f'Can not load {v}')
-                
+
                 v = obj
             if instance:
                 if isinstance(v, base_class):
