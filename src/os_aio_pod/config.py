@@ -1,21 +1,31 @@
-from typing import List, Union
-
-from pydantic import BaseModel, validator
-
+import os
 from enum import Enum
-import logging
+from typing import List
+
+from pydantic import BaseSettings, validator
+
+ENV_PREFIX = 'OS_AIO_POD_'
 
 
 class StrEnum(str, Enum):
     """Enum where members are also (and must be) string"""
 
 
-class BeanConfig(BaseModel):
+class BeanConfig(BaseSettings):
 
     label: str = None
     core: str
+    config: str = None
+
+    @validator('config')
+    def validate_config(cls, v):
+        abs_path = os.path.abspath(v)
+        if not os.path.exists(abs_path) or not os.path.isfile(abs_path):
+            raise ValueError(f'Invalid config file {v}')
+        return abs_path
 
     class Config:
+        env_prefix = ENV_PREFIX
         allow_extra = True
 
 
@@ -42,9 +52,9 @@ def loop_types():
 LoopType = StrEnum('LoopType', loop_types())
 
 
-class PodConfig(BaseModel):
+class PodConfig(BaseSettings):
 
-    BEANS: List[dict] = []
+    BEANS: List[BeanConfig] = []
     LOG_LEVEL: LogLevel = LogLevel.info
     LOOP_TYPE: LoopType = list(LoopType)[0] if len(
         LoopType) == 1 else LoopType.auto
@@ -52,4 +62,12 @@ class PodConfig(BaseModel):
     STOP_WAIT_TIME: int = None
 
     class Config:
+        env_prefix = ENV_PREFIX
+        allow_extra = True
+        validate_all = True
+
+
+class BlankConfig(BaseSettings):
+    class Config:
+        env_prefix = ENV_PREFIX
         allow_extra = True
