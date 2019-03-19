@@ -10,20 +10,26 @@ from pkgutil import iter_modules
 from os_aio_pod.config import BlankConfig
 
 
-def update_from_bean_config(config):
+def update_from_config_file(old_config, config_file, exclude=None):
+    md = load_module_from_pyfile(os.path.abspath(config_file))
+    blank_config = BlankConfig.parse_obj(dict(
+        [(i, getattr(md, i)) for i in dir(md)
+         if not i.startswith('_')]))
+    new_config = old_config.copy(
+        deep=True,
+        update=blank_config.dict(exclude=exclude)
+    )
+    return new_config
+
+
+def update_from_bean_config_file(config):
     bean_configs = []
     for old_config in config.BEANS:
-        if old_config.config is None:
+        if not hasattr(old_config, 'config_file') or old_config is None:
             continue
-        config_file = old_config.config
-        md = load_module_from_pyfile(os.path.abspath(config_file))
-        blank_config = BlankConfig.parse_obj(dict(
-            [(i, getattr(md, i)) for i in dir(md)
-             if not i.startswith('_')]))
-        new_config = old_config.copy(
-            deep=True,
-            update=blank_config.dict(exclude={'core', 'config'})
-        )
+        config_file = old_config.config_file
+        new_config = update_from_config_file(old_config, config_file,
+                                             exclude={'core', 'config_file'})
         bean_configs.append(new_config)
     if bean_configs:
         config = config.copy(deep=True, update={'BEANS': bean_configs})
