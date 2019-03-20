@@ -68,7 +68,7 @@ class InitBeans(Initializer):
 
     def _load_bean(self, pod, bean_config):
         obj = load_obj(bean_config.core)
-        kwargs = bean_config.dict(exclude={'core'})
+        kwargs = dict([(k,getattr(bean_config, k)) for k,_ in bean_config if k!="core"])
         pod.add_bean(obj, **kwargs)
 
     def init(self, config, pod):
