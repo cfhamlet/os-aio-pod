@@ -44,21 +44,19 @@ def run(config):
 )
 @click.option(
     '-l', '--log-level',
-    default=DEFAULT_CONFIG.LOG_LEVEL.name, show_default=True,
     type=click.Choice([l.name for l in LogLevel]),
-    help='Log level.'
+    help=f'Log level. (default: {DEFAULT_CONFIG.LOG_LEVEL.name})'
 )
 @click.option(
     '--loop-type',
     default=DEFAULT_CONFIG.LOOP_TYPE.name, show_default=True,
     type=click.Choice([l.name for l in LoopType]),
-    help='Loop type.'
+    help=f'Loop type. (default: {DEFAULT_CONFIG.LOOP_TYPE.name})'
 )
 @click.option(
     '--stop-wait-time',
-    default=DEFAULT_CONFIG.STOP_WAIT_TIME, show_default=True,
     type=click.INT,
-    help='Stop wait time.'
+    help=f'Stop wait time. (default: {DEFAULT_CONFIG.STOP_WAIT_TIME})'
 )
 @click.pass_context
 def cli(ctx, **kwargs):
@@ -66,14 +64,17 @@ def cli(ctx, **kwargs):
 
     ctx.ensure_object(dict)
 
-    kwargs = dict([(k, v) for k, v in kwargs.items() if v])
     config = DEFAULT_CONFIG
     if 'config_file' in kwargs:
         cfile = kwargs.pop('config_file')
         config = load_core_config_from_pyfile(PodConfig, cfile.name)
 
-    config = PodConfig(
-        **config.copy(update=dict([(i.upper(), kwargs[i]) for i in kwargs])).dict())
+    if not kwargs['debug']:
+        kwargs.pop('debug')
+
+    config = PodConfig(**config.copy(
+        update=dict([(i.upper(), kwargs[i])
+                     for i in kwargs if kwargs[i] is not None])).dict())
 
     config = update_from_bean_config_file(config)
     if config.DEBUG:
