@@ -7,8 +7,8 @@ from os_aio_pod.config import LogLevel, LoopType, PodConfig
 from os_aio_pod.initializers import (InitBeans, InitDebug, InitLog, InitLoop,
                                      InitSignal)
 from os_aio_pod.pod import create
-from os_aio_pod.utils import (load_module_from_pyfile,
-                              update_from_bean_config_file, vars_from_module)
+from os_aio_pod.utils import (load_core_config_from_pyfile,
+                              update_from_bean_config_file)
 
 DEFAULT_CONFIG = PodConfig()
 
@@ -70,9 +70,7 @@ def cli(ctx, **kwargs):
     config = DEFAULT_CONFIG
     if 'config_file' in kwargs:
         cfile = kwargs.pop('config_file')
-        module = load_module_from_pyfile(os.path.abspath(cfile.name))
-        config = PodConfig.parse_obj(vars_from_module(
-            module, lambda v: not v.startswith('_') and v.isupper()))
+        config = load_core_config_from_pyfile(PodConfig, cfile.name)
 
     config = PodConfig(
         **config.copy(update=dict([(i.upper(), kwargs[i]) for i in kwargs])).dict())
