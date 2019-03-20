@@ -10,6 +10,23 @@ from pkgutil import iter_modules
 from os_aio_pod.config import BlankConfig
 
 
+def vars_from_module(module, pass_func=None):
+
+    def all_pass(v):
+        return True
+
+    if pass_func is None:
+        pass_func = all_pass
+
+    return dict(
+        [
+            (v, getattr(module, v))
+            for v in dir(module)
+            if pass_func(v)
+        ]
+    )
+
+
 def update_from_config_file(old_config, config_file, exclude=None):
     md = load_module_from_pyfile(os.path.abspath(config_file))
     blank_config = BlankConfig.parse_obj(dict(
