@@ -15,14 +15,6 @@ class BeanConfig(BaseSettings):
 
     label: str = None
     core: str
-    config: str = None
-
-    @validator('config')
-    def validate_config(cls, v):
-        abs_path = os.path.abspath(v)
-        if not os.path.exists(abs_path) or not os.path.isfile(abs_path):
-            raise ValueError(f'Invalid config file {v}')
-        return abs_path
 
     class Config:
         env_prefix = ENV_PREFIX
