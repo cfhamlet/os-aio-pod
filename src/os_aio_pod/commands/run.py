@@ -73,14 +73,18 @@ def cli(ctx, **kwargs):
         kwargs.pop('debug')
 
     config = PodConfig(**config.copy(
-        update=dict([(i.upper(), kwargs[i])
-                     for i in kwargs if kwargs[i] is not None])).dict())
+        update=dict([(k.upper(), v)
+                     for k, v in kwargs.items() if v is not None])).dict())
 
     config = update_from_bean_config_file(config)
+
     if config.DEBUG:
         try:
-            print(config.json(indent=4))
-        except:
-            pass
+            import inspect
+            print(config.json(encoder=lambda v: str(v)
+                              if inspect.isclass(v) else v, indent=4))
+        except Exception as e:
+            import warnings
+            warnings.warn(f'Can not print config debug info, {e}')
 
     run(config)
