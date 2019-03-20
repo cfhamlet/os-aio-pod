@@ -27,6 +27,19 @@ def vars_from_module(module, pass_func=None):
     )
 
 
+def is_public_upper(v):
+    return not v.startswith('_') and v.isupper()
+
+
+def load_core_config_from_module(config_cls, module):
+    return config_cls.parse_obj(vars_from_module(module, is_public_upper))
+
+
+def load_core_config_from_pyfile(config_cls, pyfile):
+    module = load_module_from_pyfile(os.path.abspath(pyfile))
+    return load_core_config_from_module(config_cls, module)
+
+
 def update_from_config_file(old_config, config_file, exclude=None):
     md = load_module_from_pyfile(os.path.abspath(config_file))
     blank_config = BlankConfig.parse_obj(dict(
