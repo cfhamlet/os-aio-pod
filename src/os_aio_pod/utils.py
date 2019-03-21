@@ -10,6 +10,17 @@ from pkgutil import iter_modules
 from os_aio_pod.config import BlankConfig
 
 
+def pydantic_dict(d, exclude=None):
+    return dict(pydantic_items(d, exclude))
+
+
+def pydantic_items(d, exclude=None):
+    for k, _ in d:
+        if exclude and k in exclude:
+            continue
+        yield k, getattr(d, k)
+
+
 def vars_from_module(module, pass_func=None):
 
     def all_pass(v):
@@ -47,7 +58,7 @@ def update_from_config_file(old_config, config_file, exclude=None):
          if not i.startswith('_')]))
     new_config = old_config.copy(
         deep=True,
-        update=blank_config.dict(exclude=exclude)
+        update=pydantic_dict(blank_config, exclude=exclude)
     )
     return new_config
 

@@ -6,7 +6,7 @@ from signal import Signals
 
 from os_aio_pod.config import BeanConfig, LoopType
 from os_aio_pod.pod import Pod
-from os_aio_pod.utils import load_obj
+from os_aio_pod.utils import load_obj, pydantic_items
 
 
 class Initializer(abc.ABC):
@@ -68,7 +68,7 @@ class InitBeans(Initializer):
 
     def _load_bean(self, pod, bean_config):
         obj = load_obj(bean_config.core)
-        kwargs = dict([(k,getattr(bean_config, k)) for k,_ in bean_config if k!="core"])
+        kwargs = dict(pydantic_items(bean_config, exclude={'core'}))
         pod.add_bean(obj, **kwargs)
 
     def init(self, config, pod):

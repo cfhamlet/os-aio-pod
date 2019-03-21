@@ -8,7 +8,7 @@ from typing import Any, Awaitable, Callable, List, Optional, Type, Union, cast
 from pydantic import BaseModel
 
 from os_aio_pod.bean import BeanContext
-from os_aio_pod.utils import model_from_string
+from os_aio_pod.utils import model_from_string, pydantic_dict
 
 try:
     from aiohttp import web
@@ -125,7 +125,7 @@ async def run_app(context: BeanContext,
                                           backlog=backlog))
         for site in sites:
             await site.start()
-        
+
         app.aio_pod_context = context
 
         if print:  # pragma: no branch
@@ -157,4 +157,4 @@ class WebAdapter(object):
 
         await run_app(self.context, config.app,
                       access_log=access_log, handle_signals=False,
-                      **config.dict(exclude={'app'}))
+                      **pydantic_dict(config, exclude={'app'}))

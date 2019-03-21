@@ -7,7 +7,7 @@ from os_aio_pod.config import LogLevel, LoopType, PodConfig
 from os_aio_pod.initializers import (InitBeans, InitDebug, InitLog, InitLoop,
                                      InitSignal)
 from os_aio_pod.pod import create
-from os_aio_pod.utils import (load_core_config_from_pyfile,
+from os_aio_pod.utils import (load_core_config_from_pyfile, pydantic_dict,
                               update_from_bean_config_file)
 
 DEFAULT_CONFIG = PodConfig()
@@ -64,7 +64,7 @@ def cli(ctx, **kwargs):
 
     ctx.ensure_object(dict)
 
-    config = DEFAULT_CONFIG
+    config = DEFAULT_CONFIG.copy()
     if 'config_file' in kwargs:
         cfile = kwargs.pop('config_file')
         config = load_core_config_from_pyfile(PodConfig, cfile.name)
@@ -72,15 +72,15 @@ def cli(ctx, **kwargs):
     if not kwargs['debug']:
         kwargs.pop('debug')
 
-    config = PodConfig(**config.copy(
-        update=dict([(k.upper(), v)
-                     for k, v in kwargs.items() if v is not None])).dict())
+    config = PodConfig(**pydantic_dict(config.copy(
+        update=dict([(k.upper(), v) for k, v in kwargs.items() if v is not None]))))
 
     config = update_from_bean_config_file(config)
 
     if config.DEBUG:
         try:
             import inspect
+            print('PodConfig:')
             print(config.json(encoder=lambda v: str(v)
                               if inspect.isclass(v) else v, indent=4))
         except Exception as e:
