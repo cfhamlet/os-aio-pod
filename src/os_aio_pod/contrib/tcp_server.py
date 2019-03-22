@@ -124,20 +124,28 @@ class TCPServerAdapter(object):
 
         async def on_signal(**kwargs):
             for sig in kwargs['keys']:
-                await tcp_server.on_signal(sig)
+                try:
+                    await tcp_server.on_signal(sig)
+                except Exception as e:
+                    logger.error(f'On signal error {e}')
 
-            await stoping_lock.acquire()
-            if not stop_event.is_set():
-                await tcp_server.on_stop()
-                server.close()
-                await server.wait_closed()
-                stop_event.set()
-            stoping_lock.release()
+            async with stoping_lock:
+                if not stop_event.is_set():
+                    try:
+                        await tcp_server.on_stop()
+                    except Exception as e:
+                        logger.error(f'On stop error {e}')
+                    server.close()
+                    await server.wait_closed()
+                    stop_event.set()
 
         await self.add_stop_signal_handler(on_signal)
 
         await stop_event.wait()
-        await tcp_server.on_cleanup()
+        try:
+            await tcp_server.on_cleanup()
+        except Exception as e:
+            logger.error(f'On cleanup error {e}')
 
         await self.remove_stop_signal_handler(on_signal)
         logger.debug(f'TCP server stopped')
