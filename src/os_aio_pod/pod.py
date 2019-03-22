@@ -26,6 +26,7 @@ class Pod(object):
         self._label_index = {}
         self._finished = set()
         self._pending = set()
+        self._coros = []
         self._bean_done_events = {}
         self._signal_dispatcher = Signal(loop=self._loop)
         self._stopped = self._started = False
@@ -49,6 +50,13 @@ class Pod(object):
     def add_bean(self, obj, label=None, **kwargs):
         self.__ensure_status('stopped', False)
         self.__ensure_status('started', False)
+        self._preprocess(obj, label=None, **kwargs)
+
+    def _load_beans(self):
+        for obj, label, kwargs in self._coros:
+            self._load_bean(obj, label, **kwargs)
+
+    def _load_bean(self, obj, label=None, **kwargs):
         self._loop.set_task_factory(self._create_bean)
         try:
             bean = self._loop.create_task((obj, label, kwargs))
@@ -75,6 +83,14 @@ class Pod(object):
             self._pending.remove(bid)
         self._finished.add(bid)
         self._bean_done_events[bid].set()
+
+    def _preprocess(self, obj, label=None, **kwargs):
+        if not (iscoroutine(obj)
+                or iscoroutinefunction(obj)
+                or (isclass(obj) and hasattr(obj, '__call__')
+                    and iscoroutinefunction(obj.__call__))):
+            raise TypeError(f'Invalid type {type(obj)}')
+        self._coros.append((obj, label, kwargs))
 
     def _create_bean(self, loop, kw):
         obj, label, kwargs = kw
@@ -140,9 +156,15 @@ class Pod(object):
         self._started = True
 
         self._logger.debug(f'Pod start')
+
+        self._load_beans()
+
         for bean in self._beans.values():
             self._logger.debug(f'Pending bean: {bean}')
 
+        # TODO 
+        # not a proper way to wait beans complete
+        # when bean catch the CancelledError
         for next_complete in asyncio.as_completed(self._beans.values()):
             try:
                 await next_complete

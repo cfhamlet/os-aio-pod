@@ -27,7 +27,7 @@ class BeanContext(object):
     async def add_signal_handler(self, sig, callback):
         return await self.pod.add_signal_handler(sig, callback=callback, callers={self.bean})
 
-    async def remove_signal_handler(self, sig, callback, callers=None):
+    async def remove_signal_handler(self, sig, callback):
         return await self.pod.remove_signal_handler(sig, callback=callback, callers={self.bean})
 
     async def send_signal(self, sig, labels=None, **kwargs):
