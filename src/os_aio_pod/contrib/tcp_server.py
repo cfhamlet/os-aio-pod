@@ -1,8 +1,6 @@
 import asyncio
-from asyncio.streams import _DEFAULT_LIMIT
 import logging
-from multiprocessing import Process
-from socket import SO_REUSEADDR, SOL_SOCKET, socket
+from asyncio.streams import _DEFAULT_LIMIT
 from typing import Union
 
 from pydantic import BaseModel, Schema, validator
@@ -54,6 +52,14 @@ class TCPServerAdapter(object):
         self.context = context
         self.server = None
 
+    async def add_stop_signal_handler(self, callback):
+        for sig in ('SIGINT', 'SIGTERM'):
+            await self.context.add_signal_handler(sig, callback)
+
+    async def remove_stop_signal_handler(self, callback):
+        for sig in ('SIGINT', 'SIGTERM'):
+            await self.context.remove_signal_handler(sig, callback)
+
     async def __call__(self, **kwargs):
         logger = logging.getLogger(self.__class__.__name__)
         config = Config(**kwargs)
@@ -83,9 +89,35 @@ class TCPServerAdapter(object):
         self.server = tcp_server
         logger.debug(f'Starting tcp server on {config.host}:{config.port}')
 
-        await tcp_server.on_setup()
-        server = await factory
-        await tcp_server.on_start()
+        on_setup_task = asyncio.ensure_future(tcp_server.on_setup(), loop=loop)
+        on_start_task = asyncio.ensure_future(tcp_server.on_start(), loop=loop)
+
+        cancelled = False
+
+        async def cancel(**kwargs):
+            for sig in kwargs['keys']:
+                await tcp_server.on_signal(sig)
+
+            for task in (on_setup_task, on_start_task):
+                if not task.done():
+                    task.cancel()
+            cancelled = True
+
+        await self.add_stop_signal_handler(cancel)
+
+        try:
+            await on_setup_task
+            server = await factory
+            await on_start_task
+        except asyncio.CancelledError as e:
+            if cancelled:
+                await self.remove_stop_signal_handler(cancel)
+                logger.warn(f'Cancelled {e}')
+                return
+            else:
+                raise e
+
+        await self.remove_stop_signal_handler(cancel)
 
         stop_event = asyncio.Event(loop=loop)
         stoping_lock = asyncio.Lock(loop=loop)
@@ -102,9 +134,10 @@ class TCPServerAdapter(object):
                 stop_event.set()
             stoping_lock.release()
 
-        for sig in ('SIGINT', 'SIGTERM'):
-            await self.context.add_signal_handler(sig, on_signal)
+        await self.add_stop_signal_handler(on_signal)
 
         await stop_event.wait()
         await tcp_server.on_cleanup()
+
+        await self.remove_stop_signal_handler(on_signal)
         logger.debug(f'TCP server stopped')
