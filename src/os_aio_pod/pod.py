@@ -144,7 +144,9 @@ class Pod(object):
             await asyncio.wait_for(self._finished_event.wait(), timeout=wait_time)
         except:
             pass
-        self._logger.debug(f'Stopping pending beans')
+
+        if self._pending:
+            self._logger.debug(f'Stopping pending beans')
         for bid in self._pending:
             self._beans[bid].cancel()
             self._logger.debug(f'Cancel bean {self._beans[bid]}')
@@ -162,7 +164,7 @@ class Pod(object):
         for bean in self._beans.values():
             self._logger.debug(f'Pending bean: {bean}')
 
-        # TODO 
+        # TODO
         # not a proper way to wait beans complete
         # when bean catch the CancelledError
         for next_complete in asyncio.as_completed(self._beans.values()):
