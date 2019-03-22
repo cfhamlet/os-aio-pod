@@ -87,32 +87,23 @@ class TCPServerAdapter(object):
 
     async def wait(self, tcp_server, method, loop):
         task = asyncio.ensure_future(getattr(tcp_server, method)(), loop=loop)
-        cancelled = []
 
         async def cancel(**kwargs):
             for sig in kwargs['keys']:
-                try:
-                    await tcp_server.on_signal(sig)
-                except Exception as e:
-                    self.logger.error(f'On signal error {e}')
+                await tcp_server.on_signal(sig)
 
             if not task.done():
                 task.cancel()
-            cancelled.append(1)
 
         await self.add_stop_signal_handler(cancel)
         try:
             await task
         except asyncio.CancelledError as e:
-            if cancelled:
-                self.logger.warn(f'Cancelled {e}')
-                return False
-            else:
-                raise e
+            self.logger.warn(f'Cancelled {e}')
+            raise e
         finally:
             await self.remove_stop_signal_handler(cancel)
 
-        return True
 
     async def __call__(self, **kwargs):
         config = Config(**kwargs)
@@ -121,8 +112,7 @@ class TCPServerAdapter(object):
         tcp_server, factory = self.create(config, loop)
         self.server = tcp_server
 
-        if not await self.wait(tcp_server, 'on_setup', loop):
-            return
+        await self.wait(tcp_server, 'on_setup', loop)
 
         self.logger.debug(
             f'Starting tcp server on {config.host}:{config.port}')
@@ -133,29 +123,24 @@ class TCPServerAdapter(object):
 
         async def on_signal(**kwargs):
             for sig in kwargs['keys']:
-                try:
-                    await tcp_server.on_signal(sig)
-                except Exception as e:
-                    self.logger.error(f'On signal error {e}')
+                await tcp_server.on_signal(sig)
 
             async with stoping_lock:
                 if not stop_event.is_set():
                     try:
                         await tcp_server.on_stop()
-                    except Exception as e:
-                        self.logger.error(f'On stop error {e}')
-                    server.close()
-                    await server.wait_closed()
-                    stop_event.set()
+                        server.close()
+                        await server.wait_closed()
+                    finally:
+                        stop_event.set()
 
         await self.add_stop_signal_handler(on_signal)
 
-        await tcp_server.on_start()
-        await stop_event.wait()
         try:
+            await tcp_server.on_start()
+            await stop_event.wait()
             await tcp_server.on_cleanup()
-        except Exception as e:
-            self.logger.error(f'On cleanup error {e}')
+        finally:
+            await self.remove_stop_signal_handler(on_signal)
 
-        await self.remove_stop_signal_handler(on_signal)
         self.logger.debug(f'TCP server stopped')
