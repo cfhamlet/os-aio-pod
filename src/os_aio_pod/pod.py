@@ -146,7 +146,7 @@ class Pod(object):
             pass
 
         if self._pending:
-            self._logger.debug(f'Stopping pending beans')
+            self._logger.debug(f'Stop pending beans')
         for bid in self._pending:
             self._beans[bid].cancel()
             self._logger.debug(f'Cancel bean {self._beans[bid]}')
