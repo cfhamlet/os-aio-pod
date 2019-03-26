@@ -11,6 +11,8 @@ from os_aio_pod.config import BlankConfig
 
 
 def pydantic_dict(d, exclude=None):
+    if isinstance(d, dict):
+        return d
     return dict(pydantic_items(d, exclude))
 
 
