@@ -8,7 +8,7 @@ from typing import Any, Awaitable, Callable, List, Optional, Type, Union, cast
 from pydantic import BaseModel
 
 from os_aio_pod.bean import BeanContext
-from os_aio_pod.utils import model_from_string, pydantic_dict
+from os_aio_pod.utils import module_from_string, pydantic_dict
 
 try:
     from aiohttp import web
@@ -28,7 +28,7 @@ except ImportError:  # pragma: no cover
 
 
 class Config(BaseModel):
-    app: model_from_string(web.Application, instance=True)
+    app: module_from_string(web.Application, instance=True)
 
     class Config:
         allow_extra = True
