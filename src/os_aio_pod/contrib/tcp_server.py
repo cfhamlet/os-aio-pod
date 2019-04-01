@@ -5,7 +5,7 @@ from typing import Union
 
 from pydantic import BaseModel, Schema, validator
 
-from os_aio_pod.utils import model_from_string
+from os_aio_pod.utils import module_from_string
 
 
 class Server(object):
@@ -37,10 +37,10 @@ class Config(BaseModel):
 
     host: str = '127.0.0.1'
     port: int = 9399
-    protocol: model_from_string(asyncio.Protocol) = None
+    protocol: module_from_string(asyncio.Protocol) = None
     backlog: int = 100
     limit: int = _DEFAULT_LIMIT
-    server: model_from_string(Server) = Schema(Server, validate_always=True)
+    server: module_from_string(Server) = Schema(Server, validate_always=True)
 
     class Config:
         allow_extra = True

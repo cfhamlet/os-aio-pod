@@ -79,7 +79,7 @@ def update_from_bean_config_file(config):
     return config
 
 
-def model_from_string(base_class, instance=False, package=None):
+def module_from_string(base_class, instance=False, package=None):
     assert inspect.isclass(base_class)
 
     class Model(str):
