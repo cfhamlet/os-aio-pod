@@ -1,4 +1,5 @@
 import asyncio
+import sys
 import os
 
 import click
@@ -80,9 +81,10 @@ def cli(ctx, **kwargs):
     if config.DEBUG:
         try:
             import inspect
-            print('PodConfig:')
+            print('PodConfig:', file=sys.stderr)
             print(config.json(encoder=lambda v: str(v)
-                              if inspect.isclass(v) else v, indent=4))
+                              if inspect.isclass(v) else v, indent=4),
+                  file=sys.stderr)
         except Exception as e:
             import warnings
             warnings.warn(f'Can not print config debug info, {e}')
