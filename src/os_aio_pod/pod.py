@@ -4,7 +4,7 @@ import sys
 import time
 from collections import OrderedDict
 from functools import partial
-from inspect import isawaitable, isclass, iscoroutine, iscoroutinefunction
+from inspect import isclass, iscoroutine, iscoroutinefunction
 
 from asyncio_dispatch import Signal
 
