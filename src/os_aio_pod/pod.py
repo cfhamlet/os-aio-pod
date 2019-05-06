@@ -50,7 +50,7 @@ class Pod(object):
     def add_bean(self, obj, label=None, **kwargs):
         self.__ensure_status('stopped', False)
         self.__ensure_status('started', False)
-        self._preprocess(obj, label=None, **kwargs)
+        self._preprocess(obj, label, **kwargs)
 
     def _load_beans(self):
         for obj, label, kwargs in self._coros:
