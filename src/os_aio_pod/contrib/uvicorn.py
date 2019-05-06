@@ -26,7 +26,7 @@ class Server(BaseServer):
         config = self.config
         if not config.loaded:
             config.load()
-        config.loaded_app.aio_pod_context = self.context
+        config.loaded_app.app.aio_pod_context = self.context
 
         self.logger = config.logger_instance
         self.lifespan = config.lifespan_class(config)
