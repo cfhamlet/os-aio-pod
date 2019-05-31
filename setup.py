@@ -15,13 +15,14 @@ def read(*filenames, **kwargs):
 
 setup(
     name='os-aio-pod',
-    version=read('src/os_aio_pod/VERSION'),
+    version=read('src/os_aio_pod/VERSION').strip(),
     packages=find_packages(where='src'),
     package_dir={'': 'src'},
     include_package_data=True,
     license='MIT License',
     description='A container of aio components.',
     long_description=open('README.md').read(),
+    long_description_content_type='text/markdown',
     author='Ozzy',
     author_email='cfhamlet@gmail.com',
     url='https://github.com/cfhamlet/os-aio-pod',
