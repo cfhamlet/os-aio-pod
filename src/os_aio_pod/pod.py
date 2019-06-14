@@ -1,6 +1,5 @@
 import asyncio
 import logging
-import sys
 import time
 from collections import OrderedDict
 from functools import partial
@@ -43,13 +42,14 @@ class Pod(object):
         await asyncio.wait(beans, loop=self._loop)
 
     def __ensure_status(self, status, true_or_false=True):
-        s = '_' + status
-        assert hasattr(self, s) and getattr(
-            self, s) == true_or_false, f'Invalid status {status}: {true_or_false}'
+        s = "_" + status
+        assert (
+            hasattr(self, s) and getattr(self, s) == true_or_false
+        ), f"Invalid status {status}: {true_or_false}"
 
     def add_bean(self, obj, label=None, **kwargs):
-        self.__ensure_status('stopped', False)
-        self.__ensure_status('started', False)
+        self.__ensure_status("stopped", False)
+        self.__ensure_status("started", False)
         self._preprocess(obj, label, **kwargs)
 
     def _load_beans(self):
@@ -78,18 +78,23 @@ class Pod(object):
         return [self._beans[bid] for bid in bids]
 
     def _on_bean_done(self, bid, future):
-        self._logger.debug(f'Bean finished {self._beans[bid]}')
+        self._logger.debug(f"Bean finished {self._beans[bid]}")
         if bid in self._pending:
             self._pending.remove(bid)
         self._finished.add(bid)
         self._bean_done_events[bid].set()
 
     def _preprocess(self, obj, label=None, **kwargs):
-        if not (iscoroutine(obj)
-                or iscoroutinefunction(obj)
-                or (isclass(obj) and hasattr(obj, '__call__')
-                    and iscoroutinefunction(obj.__call__))):
-            raise TypeError(f'Invalid type {type(obj)}')
+        if not (
+            iscoroutine(obj)
+            or iscoroutinefunction(obj)
+            or (
+                isclass(obj)
+                and hasattr(obj, "__call__")
+                and iscoroutinefunction(obj.__call__)
+            )
+        ):
+            raise TypeError(f"Invalid type {type(obj)}")
         self._coros.append((obj, label, kwargs))
 
     def _create_bean(self, loop, kw):
@@ -103,11 +108,15 @@ class Pod(object):
             pass
         elif iscoroutinefunction(obj):
             coro = obj(**kwargs)
-        elif isclass(obj) and hasattr(obj, '__call__') and iscoroutinefunction(obj.__call__):
+        elif (
+            isclass(obj)
+            and hasattr(obj, "__call__")
+            and iscoroutinefunction(obj.__call__)
+        ):
             instance = obj(context)
             coro = instance(**kwargs)
         else:
-            raise TypeError(f'Invalid type {type(obj)}')
+            raise TypeError(f"Invalid type {type(obj)}")
 
         context.instance = instance
         return Bean(context, coro, loop=self._loop)
@@ -117,28 +126,31 @@ class Pod(object):
         return await call(key=sig, senders=callers, **kwargs)
 
     async def add_signal_handler(self, sig, callback, callers=None):
-        return await self.__signal('connect', sig, callback=callback, callers=callers)
+        return await self.__signal("connect", sig, callback=callback, callers=callers)
 
     async def remove_signal_handler(self, sig, callback, callers=None):
-        return await self.__signal('disconnect', sig, callback=callback, callers=callers)
+        return await self.__signal(
+            "disconnect", sig, callback=callback, callers=callers
+        )
 
     async def send_signal(self, sig, callers=None, **kwargs):
-        return await self.__signal('send', sig, callers=callers, **kwargs)
+        return await self.__signal("send", sig, callers=callers, **kwargs)
 
     def stop(self, timeout=None, sig=None):
-        self.__ensure_status('stopped', False)
-        self.__ensure_status('started')
+        self.__ensure_status("stopped", False)
+        self.__ensure_status("started")
         if self._stopping_event.is_set():
             return
         asyncio.run_coroutine_threadsafe(
-            self._stop(time.time(), timeout, sig), self._loop)
+            self._stop(time.time(), timeout, sig), self._loop
+        )
 
     async def _stop(self, event_time, timeout=None, sig=None):
-        self._logger.debug(f'Stopping timeout: {timeout}')
+        self._logger.debug(f"Stopping timeout: {timeout}")
         if sig:
-            self._logger.debug(f'Recv signal {sig}')
+            self._logger.debug(f"Recv signal {sig}")
             r = await self.send_signal(sig)
-            self._logger.debug(f'Dispatch signal {sig} {r}')
+            self._logger.debug(f"Dispatch signal {sig} {r}")
         wait_time = timeout if timeout is None else event_time + timeout - time.time()
         try:
             await asyncio.wait_for(self._finished_event.wait(), timeout=wait_time)
@@ -146,23 +158,23 @@ class Pod(object):
             pass
 
         if self._pending:
-            self._logger.debug(f'Stop pending beans')
+            self._logger.debug(f"Stop pending beans")
         for bid in self._pending:
             self._beans[bid].cancel()
-            self._logger.debug(f'Cancel bean {self._beans[bid]}')
+            self._logger.debug(f"Cancel bean {self._beans[bid]}")
         self._stopping_event.set()
 
     async def run(self):
-        self.__ensure_status('stopped', False)
-        self.__ensure_status('started', False)
+        self.__ensure_status("stopped", False)
+        self.__ensure_status("started", False)
         self._started = True
 
-        self._logger.debug(f'Pod start')
+        self._logger.debug(f"Pod start")
 
         self._load_beans()
 
         for bean in self._beans.values():
-            self._logger.debug(f'Pending bean: {bean}')
+            self._logger.debug(f"Pending bean: {bean}")
 
         # TODO
         # not a proper way to wait beans complete
@@ -179,4 +191,4 @@ class Pod(object):
             await self._stopping_event.wait()
         self._started = False
         self._stopped = True
-        self._logger.debug(f'Pod finished')
+        self._logger.debug(f"Pod finished")

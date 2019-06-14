@@ -1,15 +1,15 @@
+import asyncio
 import warnings
+
 try:
     from aiomonitor.monitor import Monitor as BaseMonitor
     from aiomonitor.utils import close_server
 except:
-    warnings.warn('Should install aiomonitor first!')
+    warnings.warn("Should install aiomonitor first!")
     raise
-import asyncio
 
 
 class Monitor(BaseMonitor):
-
     async def close(self) -> None:
         if not self._closed:
             self._closing.set()
@@ -21,15 +21,11 @@ class Monitor(BaseMonitor):
 
 
 class AioMonitorAdapter(object):
-
     def __init__(self, context):
         self.context = context
 
     async def __call__(self, **kwargs):
-        monitor = Monitor(
-            loop=self.context.loop,
-            **kwargs
-        )
+        monitor = Monitor(loop=self.context.loop, **kwargs)
 
         stop_event = asyncio.Event(loop=self.context.loop)
 
@@ -40,7 +36,7 @@ class AioMonitorAdapter(object):
                 finally:
                     stop_event.set()
 
-        for sig in ('SIGINT', 'SIGTERM'):
+        for sig in ("SIGINT", "SIGTERM"):
             await self.context.add_signal_handler(sig, stop)
 
         monitor.start()

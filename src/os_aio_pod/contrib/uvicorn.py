@@ -1,5 +1,3 @@
-
-import asyncio
 import os
 import warnings
 
@@ -7,12 +5,11 @@ try:
     from uvicorn.main import Server as BaseServer
     from uvicorn.config import Config
 except:
-    warnings.warn('Should install uvicorn first!')
+    warnings.warn("Should install uvicorn first!")
     raise
 
 
 class Server(BaseServer):
-
     def __init__(self, config, context):
         super(Server, self).__init__(config)
         self.context = context
@@ -28,8 +25,8 @@ class Server(BaseServer):
             config.load()
 
         app = config.loaded_app
-        if hasattr(app, 'app'):
-            app = getattr(app, 'app')
+        if hasattr(app, "app"):
+            app = getattr(app, "app")
         app.aio_pod_context = self.context
 
         self.logger = config.logger_instance
@@ -44,7 +41,7 @@ class Server(BaseServer):
         self.logger.info(f"Finished server process [{process_id}]")
 
     async def install_signal_handlers(self):
-        for sig in ('SIGINT', 'SIGTERM'):
+        for sig in ("SIGINT", "SIGTERM"):
             await self.context.add_signal_handler(sig, self.handle_exit)
 
     def handle_exit(self, **kwargs):
@@ -55,13 +52,12 @@ class Server(BaseServer):
 
 
 class UvicornAdapter(object):
-
     def __init__(self, context):
         self.context = context
 
     async def __call__(self, **kwargs):
-        kwargs.pop('loop', None)
-        app = kwargs.pop('app')
+        kwargs.pop("loop", None)
+        app = kwargs.pop("app")
         config = Config(app, **kwargs)
         server = Server(config=config, context=self.context)
 
