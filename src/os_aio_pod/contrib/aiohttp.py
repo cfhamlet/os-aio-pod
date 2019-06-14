@@ -31,7 +31,7 @@ class Config(BaseModel):
     app: module_from_string(web.Application, instance=True)
 
     class Config:
-        allow_extra = True
+        extra = 'allow'
 
 
 async def run_app(context: BeanContext,

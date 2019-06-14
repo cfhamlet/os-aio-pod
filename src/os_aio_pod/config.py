@@ -18,7 +18,7 @@ class BeanConfig(BaseSettings):
 
     class Config:
         env_prefix = ENV_PREFIX
-        allow_extra = True
+        extra = 'allow'
 
 
 class LogLevel(StrEnum):
@@ -55,11 +55,11 @@ class PodConfig(BaseSettings):
 
     class Config:
         env_prefix = ENV_PREFIX
-        allow_extra = True
+        extra = 'allow'
         validate_all = True
 
 
 class BlankConfig(BaseSettings):
     class Config:
         env_prefix = ENV_PREFIX
-        allow_extra = True
+        extra = 'allow'

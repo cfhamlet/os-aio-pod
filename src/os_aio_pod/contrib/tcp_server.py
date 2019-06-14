@@ -43,7 +43,7 @@ class Config(BaseModel):
     server: module_from_string(Server) = Schema(Server, validate_always=True)
 
     class Config:
-        allow_extra = True
+        extra = 'allow'
 
 
 class TCPServerAdapter(object):
