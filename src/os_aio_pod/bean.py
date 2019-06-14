@@ -1,6 +1,5 @@
-import asyncio
-from itertools import chain
 from asyncio import Task
+from itertools import chain
 
 
 class BeanContext(object):
@@ -25,28 +24,30 @@ class BeanContext(object):
         return self.pod.get_beans(self.id)[0]
 
     async def add_signal_handler(self, sig, callback):
-        return await self.pod.add_signal_handler(sig, callback=callback, callers={self.bean})
+        return await self.pod.add_signal_handler(
+            sig, callback=callback, callers={self.bean}
+        )
 
     async def remove_signal_handler(self, sig, callback):
-        return await self.pod.remove_signal_handler(sig, callback=callback, callers={self.bean})
+        return await self.pod.remove_signal_handler(
+            sig, callback=callback, callers={self.bean}
+        )
 
     async def send_signal(self, sig, labels=None, **kwargs):
         beans = None
         if labels is not None:
-            beans = set(
-                chain(*[self.pod.get_beans(label) for label in labels]))
+            beans = set(chain(*[self.pod.get_beans(label) for label in labels]))
         return await self.pod.send_signal(sig, callers=beans, **kwargs)
 
 
 class Bean(Task):
-
     def __init__(self, context, coro, *, loop=None):
         super(Bean, self).__init__(coro, loop=loop)
         self.context = context
 
     def _repr_info(self):
         info = super(Bean, self)._repr_info()
-        info.append(f'{self.id}-{self.label}')
+        info.append(f"{self.id}-{self.label}")
         return info
 
     @property

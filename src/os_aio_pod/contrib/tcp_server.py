@@ -1,15 +1,13 @@
 import asyncio
 import logging
 from asyncio.streams import _DEFAULT_LIMIT
-from typing import Union
 
-from pydantic import BaseModel, Schema, validator
+from pydantic import BaseModel, Schema
 
 from os_aio_pod.utils import module_from_string
 
 
 class Server(object):
-
     def __init__(self, context, config):
         self.context = context
         self.config = config
@@ -35,7 +33,7 @@ class Server(object):
 
 class Config(BaseModel):
 
-    host: str = '127.0.0.1'
+    host: str = "127.0.0.1"
     port: int = 9399
     protocol: module_from_string(asyncio.Protocol) = None
     backlog: int = 100
@@ -43,22 +41,21 @@ class Config(BaseModel):
     server: module_from_string(Server) = Schema(Server, validate_always=True)
 
     class Config:
-        allow_extra = True
+        extra = "allow"
 
 
 class TCPServerAdapter(object):
-
     def __init__(self, context):
         self.context = context
         self.logger = logging.getLogger(self.__class__.__name__)
         self.server = None
 
     async def add_stop_signal_handler(self, callback):
-        for sig in ('SIGINT', 'SIGTERM'):
+        for sig in ("SIGINT", "SIGTERM"):
             await self.context.add_signal_handler(sig, callback)
 
     async def remove_stop_signal_handler(self, callback):
-        for sig in ('SIGINT', 'SIGTERM'):
+        for sig in ("SIGINT", "SIGTERM"):
             await self.context.remove_signal_handler(sig, callback)
 
     def create(self, config, loop):
@@ -72,15 +69,12 @@ class TCPServerAdapter(object):
                 config.port,
                 backlog=config.backlog,
                 limit=config.limit,
-                loop=loop
+                loop=loop,
             )
         else:
             config.protocol.server = tcp_server
             factory = loop.create_server(
-                config.protocol,
-                config.host,
-                config.port,
-                backlog=config.backlog,
+                config.protocol, config.host, config.port, backlog=config.backlog
             )
 
         return tcp_server, factory
@@ -89,7 +83,7 @@ class TCPServerAdapter(object):
         task = asyncio.ensure_future(getattr(tcp_server, method)(), loop=loop)
 
         async def cancel(**kwargs):
-            for sig in kwargs['keys']:
+            for sig in kwargs["keys"]:
                 await tcp_server.on_signal(sig)
 
             if not task.done():
@@ -99,11 +93,10 @@ class TCPServerAdapter(object):
         try:
             await task
         except asyncio.CancelledError as e:
-            self.logger.warn(f'Cancelled {e}')
+            self.logger.warn(f"Cancelled {e}")
             raise e
         finally:
             await self.remove_stop_signal_handler(cancel)
-
 
     async def __call__(self, **kwargs):
         config = Config(**kwargs)
@@ -112,17 +105,16 @@ class TCPServerAdapter(object):
         tcp_server, factory = self.create(config, loop)
         self.server = tcp_server
 
-        await self.wait(tcp_server, 'on_setup', loop)
+        await self.wait(tcp_server, "on_setup", loop)
 
-        self.logger.debug(
-            f'Starting tcp server on {config.host}:{config.port}')
+        self.logger.debug(f"Starting tcp server on {config.host}:{config.port}")
 
         server = await factory
         stop_event = asyncio.Event(loop=loop)
         stoping_lock = asyncio.Lock(loop=loop)
 
         async def on_signal(**kwargs):
-            for sig in kwargs['keys']:
+            for sig in kwargs["keys"]:
                 await tcp_server.on_signal(sig)
 
             async with stoping_lock:
@@ -143,4 +135,4 @@ class TCPServerAdapter(object):
         finally:
             await self.remove_stop_signal_handler(on_signal)
 
-        self.logger.debug(f'TCP server stopped')
+        self.logger.debug(f"TCP server stopped")
