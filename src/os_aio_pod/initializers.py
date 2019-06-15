@@ -26,7 +26,15 @@ class InitLoop(Initializer):
         def setup_asyncio():
             pass
 
-        {"auto": setup_uvloop, "uvloop": setup_uvloop, "asyncio": setup_asyncio}.get(
+        def setup_auto():
+            try:
+                setup_uvloop()
+                return
+            except:
+                pass
+            setup_asyncio()
+
+        {"auto": setup_auto, "uvloop": setup_uvloop, "asyncio": setup_asyncio}.get(
             config.LOOP_TYPE.value
         )()
 
