@@ -19,7 +19,7 @@ def create(config, *initializers):
 
 
 class Pod(object):
-    def __init__(self, loop=None):
+    def __init__(self, config=None, loop=None):
         self._loop = loop if loop else asyncio.get_event_loop()
         self._beans = OrderedDict()
         self._label_index = {}
@@ -32,6 +32,11 @@ class Pod(object):
         self._finished_event = asyncio.Event(loop=self._loop)
         self._stopping_event = asyncio.Event(loop=self._loop)
         self._logger = logging.getLogger(self.__class__.__name__)
+        self._config = config
+
+    @property
+    def config(self):
+        return self._config
 
     @property
     def loop(self):

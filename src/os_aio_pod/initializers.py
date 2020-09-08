@@ -39,7 +39,7 @@ class InitLoop(Initializer):
         )()
 
         loop = asyncio.get_event_loop()
-        return Pod(loop=loop)
+        return Pod(config=config, loop=loop)
 
 
 class InitLog(Initializer):
