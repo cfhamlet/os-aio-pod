@@ -55,7 +55,7 @@ def cli(ctx, **kwargs):
     ctx.ensure_object(dict)
 
     config = DEFAULT_CONFIG.copy()
-    if "config_file" in kwargs:
+    if "config_file" in kwargs and kwargs["config_file"]:
         cfile = kwargs.pop("config_file")
         config = load_core_config_from_pyfile(PodConfig, cfile.name)
 
