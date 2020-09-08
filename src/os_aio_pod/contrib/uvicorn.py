@@ -2,8 +2,8 @@ import os
 import warnings
 
 try:
-    from uvicorn.main import Server as BaseServer
     from uvicorn.config import Config
+    from uvicorn.main import Server as BaseServer
 except:
     warnings.warn("Should install uvicorn first!")
     raise
