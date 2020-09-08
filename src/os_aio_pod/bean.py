@@ -9,6 +9,10 @@ class BeanContext(object):
         self.pod = pod
         self.instance = None
 
+    @property
+    def config(self):
+        return self.pod.config
+
     async def wait_beans_done(self, bid_or_label):
         await self.pod.wait_beans_done(bid_or_label)
 
