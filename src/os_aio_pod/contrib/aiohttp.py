@@ -12,11 +12,11 @@ from os_aio_pod.utils import module_from_string, pydantic_dict
 
 try:
     from aiohttp import web
-    from aiohttp.log import access_logger
-    from aiohttp.web_log import AccessLogger
-    from aiohttp.web_app import Application
-    from aiohttp.web_runner import UnixSite, TCPSite, SockSite, AppRunner
     from aiohttp.abc import AbstractAccessLogger
+    from aiohttp.log import access_logger
+    from aiohttp.web_app import Application
+    from aiohttp.web_log import AccessLogger
+    from aiohttp.web_runner import AppRunner, SockSite, TCPSite, UnixSite
 except:
     warnings.warn("Should install aiohttp first!")
     raise
