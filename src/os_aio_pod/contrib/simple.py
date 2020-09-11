@@ -5,7 +5,7 @@ import logging
 class Server(object):
     def __init__(self, context):
         self.context = context
-        self.logger = logging.getLogger(self.__class__.__name_)
+        self.logger = logging.getLogger(self.__class__.__name__)
 
     @property
     def config(self):
