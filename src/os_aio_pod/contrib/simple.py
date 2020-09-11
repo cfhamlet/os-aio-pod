@@ -7,7 +7,7 @@ class Server(object):
 
     @property
     def config(self):
-        self.context.config
+        return self.context.config
 
     def on_stop(self, **kwargs):
         pass
