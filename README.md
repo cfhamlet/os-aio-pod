@@ -155,6 +155,32 @@ $ os-aio-pod run --help
 
 There are some built-in adapters can be used for convenient:
 
+
+* built-in simple server class ``os_aio_pod.contrib.simple.Server``
+
+    It is a scaffold base class for simple server
+
+    ```
+    from os_aio_pod.contrib.simple import Server
+
+    class YourServer(Server):
+
+        # can be async/sync 
+        async def startup(self, **kwargs):
+            pass
+
+        # can be async/sync 
+        async def cleanup(self, **kwargs):
+            pass
+
+        async def run(self, **kwargs):
+            print(self.config)
+
+        # on kill(Ctrl+C)
+        def on_stop(self, **kwargs):
+            pass
+    ```
+
 * [uvicorn](https://github.com/encode/uvicorn), a lightning-fast ASGI server
 
     ```
