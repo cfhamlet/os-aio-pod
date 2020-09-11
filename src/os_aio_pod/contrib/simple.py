@@ -1,9 +1,11 @@
 import inspect
+import logging
 
 
 class Server(object):
     def __init__(self, context):
         self.context = context
+        self.logger = logging.getLogger(self.__class__.__name_)
 
     @property
     def config(self):
