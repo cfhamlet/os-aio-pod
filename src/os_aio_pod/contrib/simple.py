@@ -23,7 +23,6 @@ class Server(object):
     async def __call__(self, **kwargs):
         for signal in ("SIGTERM", "SIGINT"):
             await self.context.add_signal_handler(signal, self.on_stop)
-            await self.context.add_signal_handler(signal, self.on_stop)
 
         d = self.startup(**kwargs)
 
