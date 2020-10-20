@@ -7,6 +7,7 @@ from os_aio_pod.initializers import InitBeans, InitDebug, InitLog, InitLoop, Ini
 from os_aio_pod.pod import create
 from os_aio_pod.utils import (
     load_core_config_from_pyfile,
+    parse_beans_arguments,
     pydantic_dict,
     update_from_bean_config_file,
 )
@@ -48,9 +49,10 @@ def run(config):
     type=click.INT,
     help=f"Stop wait time. (default: {DEFAULT_CONFIG.STOP_WAIT_TIME})",
 )
+@click.argument("BEANS", nargs=-1)
 @click.pass_context
 def cli(ctx, **kwargs):
-    """Run server."""
+    """Run pods."""
 
     ctx.ensure_object(dict)
 
@@ -62,6 +64,8 @@ def cli(ctx, **kwargs):
     if not kwargs["debug"]:
         kwargs.pop("debug")
 
+    config.BEANS.extend(parse_beans_arguments(kwargs.pop("beans")))
+
     config = PodConfig(
         **pydantic_dict(
             config.copy(
@@ -71,7 +75,6 @@ def cli(ctx, **kwargs):
             )
         )
     )
-
     config = update_from_bean_config_file(config)
 
     if config.DEBUG:

@@ -161,3 +161,54 @@ def load_module_from_pyfile(filename):
         e.strerror = "Unable to load configuration file (%s)" % e.strerror
         raise
     return module
+
+
+def escape_split(sep, argstr):
+    """
+    Allows for escaping of the separator: e.g. task:arg='foo\, bar'
+
+    It should be noted that the way bash et. al. do command line parsing, those
+    single quotes are required.
+
+    Copy from fabric 1.14
+    """
+    escaped_sep = r"\%s" % sep
+
+    if escaped_sep not in argstr:
+        return argstr.split(sep)
+
+    before, _, after = argstr.partition(escaped_sep)
+    startlist = before.split(sep)  # a regular split is fine here
+    unfinished = startlist[-1]
+    startlist = startlist[:-1]
+
+    # recurse because there may be more escaped separators
+    endlist = escape_split(sep, after)
+
+    # finish building the escaped value. we use endlist[0] becaue the first
+    # part of the string sent in recursion is the rest of the escaped value.
+    unfinished += sep + endlist[0]
+
+    return startlist + [unfinished] + endlist[1:]  # put together all the parts
+
+
+def parse_beans_arguments(arguments):
+    """
+    Parse string list into list of tuples: command, args, kwargs, hosts, roles.
+
+    See sites/docs/usage/fab.rst, section on "per-task arguments" for details.
+    """
+    beans = []
+    for cmd in arguments:
+        bean = {"core": cmd}
+        if ":" in cmd:
+            cmd, argstr = cmd.split(":", 1)
+            bean["core"] = cmd
+            for pair in escape_split(",", argstr):
+                result = escape_split("=", pair)
+                if len(result) > 1:
+                    k, v = result
+                    if k not in {"core"}:
+                        bean[k] = v
+        beans.append(bean)
+    return beans

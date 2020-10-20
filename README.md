@@ -45,8 +45,8 @@ There are some extra packages can be installed for more  features.
 
 Three steps:
 
-1.  write your coroutine
-2. write a config file(Python file)
+1. write your coroutine
+2. write a config file(Python file), not necessary since v0.1.25
 3. run with ``os-aio-pod``
 
 ### APIs
@@ -141,7 +141,11 @@ STOP_WAIT_TIME = 10
 $ os-aio-pod run -c config.py
 ```
 
+or quick start
 
+```
+$ os-aio-pod run [awaitable-func:k1=v1,k2=v2]
+```
 
 The reserved config key words(exclude ``BEANS``) can be set by passing command line options.
 
