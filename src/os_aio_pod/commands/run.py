@@ -34,25 +34,29 @@ def run(config):
 @click.option(
     "-l",
     "--log-level",
+    default=DEFAULT_CONFIG.LOG_LEVEL.name,
+    show_default=True,
     type=click.Choice([l.name for l in LogLevel]),
-    help=f"Log level. (default: {DEFAULT_CONFIG.LOG_LEVEL.name})",
+    help=f"Log level.",
 )
 @click.option(
     "--loop-type",
     default=DEFAULT_CONFIG.LOOP_TYPE.name,
     show_default=True,
     type=click.Choice([l.name for l in LoopType]),
-    help=f"Loop type. (default: {DEFAULT_CONFIG.LOOP_TYPE.name})",
+    help=f"Loop type.",
 )
 @click.option(
     "--stop-wait-time",
+    default=DEFAULT_CONFIG.STOP_WAIT_TIME,
+    show_default=True,
     type=click.INT,
-    help=f"Stop wait time. (default: {DEFAULT_CONFIG.STOP_WAIT_TIME})",
+    help=f"Stop wait time.",
 )
 @click.argument("BEANS", nargs=-1)
 @click.pass_context
 def cli(ctx, **kwargs):
-    """Run pods."""
+    """Run pod."""
 
     ctx.ensure_object(dict)
 
