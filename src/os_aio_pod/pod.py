@@ -98,8 +98,9 @@ class Pod(object):
                 and hasattr(obj, "__call__")
                 and iscoroutinefunction(obj.__call__)
             )
+            or hasattr(obj, "__bean_label")
         ):
-            raise TypeError(f"Invalid type {type(obj)}")
+            raise TypeError(f"Invalid type {obj}")
         self._coros.append((obj, label, kwargs))
 
     def _create_bean(self, loop, kw):
@@ -107,6 +108,10 @@ class Pod(object):
         instance = None
         coro = obj
         idx = 1 if not self._beans else list(self._beans.keys())[-1] + 1
+        pass_context = False
+        if hasattr(obj, "__bean_label"):
+            label = getattr(obj, "__bean_label")
+            pass_context = True
         context = BeanContext(self, idx, label)
 
         if iscoroutine(obj):
@@ -120,8 +125,10 @@ class Pod(object):
         ):
             instance = obj(context)
             coro = instance(**kwargs)
+        elif pass_context:
+            coro = obj(context, **kwargs)
         else:
-            raise TypeError(f"Invalid type {type(obj)}")
+            raise TypeError(f"Invalid type {obj}")
 
         context.instance = instance
         return Bean(context, coro, loop=self._loop)
