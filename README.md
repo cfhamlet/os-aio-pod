@@ -85,6 +85,16 @@ Actually, there are three types of coroutine code for your choice:
 
 When you use class type coroutine, you can use the context to communicate with the framework and other beans.
 
+Since v0.1.27, ``pass_context`` decorator can be used for passing context to function as the first argument if it is invoked by the framework. ``lable`` can also be specified as argument ``@pass_context(label="app")``
+
+```
+from os_aio_pod.decorators import pass_context
+
+@pass_context
+async def hello_world(context, **kwargs):
+    print(context, kwargs)
+```
+
 #### Signals
 
 Thanks to [asyncio_dispatch](https://github.com/lenzenmi/asyncio_dispatch), we easily can register and deliver signals.
