@@ -19,7 +19,7 @@ from .simple import Server
 
 class TelnetServerAdapter(Server):
     async def run(self, **kwargs):
-        lcs = locals()
+        lcs = {"context": self.context}
 
         async def interact(connection=None):
             global_dict = {**globals(), "print": print_formatted_text}
