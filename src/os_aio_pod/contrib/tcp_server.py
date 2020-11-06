@@ -111,13 +111,13 @@ class TCPServerAdapter(object):
 
         server = await factory
         stop_event = asyncio.Event(loop=loop)
-        stoping_lock = asyncio.Lock(loop=loop)
+        stopping_lock = asyncio.Lock(loop=loop)
 
         async def on_signal(**kwargs):
             for sig in kwargs["keys"]:
                 await tcp_server.on_signal(sig)
 
-            async with stoping_lock:
+            async with stopping_lock:
                 if not stop_event.is_set():
                     try:
                         await tcp_server.on_stop()
