@@ -11,7 +11,7 @@ class Server(object):
     def config(self):
         return self.context.config
 
-    def on_stop(self, **kwargs):
+    async def on_stop(self, **kwargs):
         pass
 
     async def startup(self, **kwargs):
