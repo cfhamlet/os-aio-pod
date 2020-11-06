@@ -195,6 +195,22 @@ There are some built-in adapters can be used for convenient:
             pass
     ```
 
+* [ptpython](https://github.com/prompt-toolkit/ptpython), python REPL
+
+
+    ```
+    pip install ptpython contextvars
+    ```
+
+    ```
+    BEANS = [
+        {
+            'core': 'os_aio_pod.contrib.pypython.TelnetServerAdapter',
+        }
+    ]
+    ```
+    you can connect this server with telnet
+
 * [uvicorn](https://github.com/encode/uvicorn), a lightning-fast ASGI server
 
     ```
