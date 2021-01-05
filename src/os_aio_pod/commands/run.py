@@ -34,17 +34,15 @@ def run(config):
 @click.option(
     "-l",
     "--log-level",
-    default=DEFAULT_CONFIG.LOG_LEVEL.name,
     show_default=True,
     type=click.Choice([l.name for l in LogLevel]),
-    help=f"Log level.",
+    help=f"Log level.  [default: {DEFAULT_CONFIG.LOG_LEVEL.name}]",
 )
 @click.option(
     "--loop-type",
-    default=DEFAULT_CONFIG.LOOP_TYPE.name,
     show_default=True,
     type=click.Choice([l.name for l in LoopType]),
-    help=f"Loop type.",
+    help=f"Loop type.  [default: {DEFAULT_CONFIG.LOOP_TYPE.name}]",
 )
 @click.option(
     "--stop-wait-time",
@@ -82,6 +80,7 @@ def cli(ctx, **kwargs):
     config = update_from_bean_config_file(config)
 
     if config.DEBUG:
+        config = config.copy(update={"LOG_LEVEL": LogLevel.debug})
         try:
             import inspect
 
@@ -96,5 +95,4 @@ def cli(ctx, **kwargs):
             import warnings
 
             warnings.warn(f"Can not print config debug info, {e}")
-
     run(config)
