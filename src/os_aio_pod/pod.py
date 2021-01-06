@@ -110,7 +110,9 @@ class Pod(object):
         idx = 1 if not self._beans else list(self._beans.keys())[-1] + 1
         pass_context = False
         if hasattr(obj, "__bean_label"):
-            label = getattr(obj, "__bean_label")
+            lb = getattr(obj, "__bean_label")
+            if lb and not label:
+                label = lb
             pass_context = True
         context = BeanContext(self, idx, label)
 
