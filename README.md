@@ -43,11 +43,24 @@ There are some extra packages can be installed for more  features.
 
 ## Usage
 
-Three steps:
+### Quick start
 
-1. write your coroutine
-2. write a config file(Python file), not necessary since v0.1.25
-3. run with ``os-aio-pod``
+1. Write your coroutine function
+
+    ```
+    # example.py
+    import asyncio
+
+    async def helloworld(**kwargs):
+        await asyncio.sleep(1)
+        print("hello world!", kwargs)
+    ```
+
+2. run with ``os-aio-pod``
+ 
+    ```
+    os-aio-pod run example.helloworld:hi="Ozzy"
+    ```
 
 ### APIs
 
