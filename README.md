@@ -154,7 +154,7 @@ $ os-aio-pod run -c config.py
 or quick start
 
 ```
-$ os-aio-pod run [awaitable-func:k1=v1,k2=v2]
+$ os-aio-pod run [awaitable-func1:k1=v1,k2=v2] [awaitable-func2:k3=v3,k4=v4]
 ```
 
 The reserved config key words(exclude ``BEANS``) can be set by passing command line options.
@@ -274,8 +274,41 @@ There are some built-in adapters can be used for convenient:
     ]
     ```
 
-    
+* built-in producer-consumer model
 
+    One producer and multi-consumers is a common model. You can inherit from ``os_aio_pod.contrib.pcflow.Server``(which is inherit from built-in simple server) and implement ``produce`` and ``consume`` methods to run as this model.
+
+    ```
+    import asyncio
+
+    from os_aio_pod.contrib.pcflow import Server
+
+
+    class YourProducerConsumerServer(Server):
+        def startup(self, **kwargs):
+            self.stopping = False
+
+        def on_stop(self, **kwargs):
+            self.stopping = True
+
+        async def produce(self, **kwargs):
+            while not self.stopping:
+                await asyncio.sleep(1)
+                yield 1
+
+        async def consume(self, obj, **kwargs):
+            print(obj) 
+    ```
+
+
+    ```
+    BEANS = [
+        {
+            'core': 'YourProducerConsumerServer',
+            'consumer_num': 10,
+        }
+    ]
+    ```
 
 ## Unit Tests
 
