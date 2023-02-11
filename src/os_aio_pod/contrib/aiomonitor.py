@@ -2,7 +2,7 @@ import asyncio
 import warnings
 from concurrent import futures
 
-from pydantic import BaseModel, Schema
+from pydantic import BaseModel, Field
 
 from os_aio_pod.utils import module_from_string
 
@@ -20,7 +20,7 @@ class Config(BaseModel):
     port: int = monitor.MONITOR_PORT
     console_port: int = monitor.CONSOLE_PORT
     console_enabled: bool = True
-    monitor: module_from_string(Monitor) = Schema(Monitor, validate_always=True)
+    monitor: module_from_string(Monitor) = Field(Monitor, validate_always=True)
 
 
 class AioMonitorAdapter(object):

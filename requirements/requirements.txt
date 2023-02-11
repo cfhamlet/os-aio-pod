@@ -1,3 +1,3 @@
 click
-pydantic
+pydantic>=1.8
 asyncio_dispatch
