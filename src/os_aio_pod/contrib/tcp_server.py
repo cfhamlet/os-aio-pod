@@ -2,7 +2,7 @@ import asyncio
 import logging
 from asyncio.streams import _DEFAULT_LIMIT
 
-from pydantic import BaseModel, Schema
+from pydantic import BaseModel, Field
 
 from os_aio_pod.utils import module_from_string
 
@@ -38,7 +38,7 @@ class Config(BaseModel):
     protocol: module_from_string(asyncio.Protocol) = None
     backlog: int = 100
     limit: int = _DEFAULT_LIMIT
-    server: module_from_string(Server) = Schema(Server, validate_always=True)
+    server: module_from_string(Server) = Field(Server, validate_always=True)
 
     class Config:
         extra = "allow"
