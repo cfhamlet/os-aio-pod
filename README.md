@@ -218,7 +218,7 @@ There are some built-in adapters can be used for convenient:
     ```
     BEANS = [
         {
-            'core': 'os_aio_pod.contrib.pypython.TelnetServerAdapter',
+            'core': 'os_aio_pod.contrib.ptpython.TelnetServerAdapter',
         }
     ]
     ```
